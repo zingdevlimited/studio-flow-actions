@@ -1,0 +1,19 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "runArgs": [
+    "--name",
+    "studio-flow-actions_devcontainer"
+  ],
+  "features": {
+    "ghcr.io/eitsupi/devcontainer-features/jq-likes:2.1.0": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "yzhang.markdown-all-in-one",
+        "github.vscode-github-actions"
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "strict": true,
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "composite": true,
+  },
+  "include": [
+    "**/src/**/*.ts"
+  ],
+  "exclude": [
+    ".eslintrc.js",
+    "__integration__/**/*.ts"
+  ]
+}

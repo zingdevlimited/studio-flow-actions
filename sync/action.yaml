@@ -1,0 +1,26 @@
+name: Sync Studio Flow
+description: Download a Studio Flow instance into source control
+
+inputs:
+  LOCAL_FILE:
+    required: true
+    description: The path to the flow.json file in the repository
+  FLOW_NAME:
+    required: false
+    description: The friendlyName of the remote Studio Flow. You need to set either this property or FLOW_SID
+  FLOW_SID:
+    required: false
+    description: The sid of the remote Studio Flow. You need to set either this property or FLOW_NAME
+  TWILIO_API_KEY:
+    required: true
+    description: The Twilio Api Key
+  TWILIO_API_SECRET:
+    required: true
+    description: The Twilio Api Secret
+  TOKEN:
+    required: true
+    description: "A GitHub token with `contents:write` and `pullrequests:write` permissions"
+
+runs:
+  using: node20
+  main: index.js
