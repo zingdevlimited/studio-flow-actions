@@ -1,5 +1,5 @@
 import { FunctionsMap, getUrlComponents } from "./serverless";
-import { SendToFlexWidgetAttributes, StudioFlow } from "./studio-schemas";
+import { ManagedWidget, SendToFlexWidgetAttributes } from "./studio-schemas";
 
 type UpdateWidgetResult = {
   changes: Array<{ widget: string; type: string; field: string; value: string }>;
@@ -7,13 +7,13 @@ type UpdateWidgetResult = {
 };
 
 export const updateRunFunctionWidgets = (
-  flow: StudioFlow,
+  states: ManagedWidget[],
   functionsMap: FunctionsMap
 ): UpdateWidgetResult => {
   const type = "run-function";
   const changes = [];
   const errors = [];
-  for (const state of flow.states) {
+  for (const state of states) {
     if (state.type !== type) continue;
 
     const urlComponents = getUrlComponents(state.properties.url);
@@ -85,14 +85,14 @@ export const updateRunFunctionWidgets = (
 };
 
 export const updateSendToFlexWidgets = (
-  flow: StudioFlow,
+  states: ManagedWidget[],
   channelsMap: Record<string, string>,
   workflowsMap: Record<string, string>
 ): UpdateWidgetResult => {
   const type = "send-to-flex";
   const changes = [];
   const errors = [];
-  for (const state of flow.states) {
+  for (const state of states) {
     if (state.type !== type) continue;
 
     const attributes = JSON.parse(state.properties.attributes) as SendToFlexWidgetAttributes;
@@ -136,13 +136,13 @@ export const updateSendToFlexWidgets = (
 };
 
 export const updateSetVariableWidgets = (
-  flow: StudioFlow,
+  states: ManagedWidget[],
   variablesMap: Record<string, string>
 ): UpdateWidgetResult => {
   const type = "set-variables";
   const changes = [];
 
-  for (const state of flow.states) {
+  for (const state of states) {
     if (state.type !== type) continue;
 
     for (const [key, value] of Object.entries(variablesMap)) {
@@ -163,12 +163,15 @@ export const updateSetVariableWidgets = (
   return { changes, errors: [] };
 };
 
-export const updateRunSubflowWidgets = (flow: StudioFlow, subflowMap: Record<string, string>) => {
+export const updateRunSubflowWidgets = (
+  states: ManagedWidget[],
+  subflowMap: Record<string, string>
+) => {
   const type = "run-subflow";
   const changes = [];
   const errors = [];
 
-  for (const state of flow.states) {
+  for (const state of states) {
     if (state.type !== type) continue;
 
     const subflowName = state.properties.parameters.find((p) => p.key === "subflowName")?.value;

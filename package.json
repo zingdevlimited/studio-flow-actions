@@ -10,8 +10,7 @@
   "scripts": {
     "lint": "eslint",
     "package:sync": "ncc -m build src/actions/sync/index.ts -o sync",
-    "package:watch": "yarn package -- --watch",
-    "json-schema-to-zod": "json-schema-to-zod -i data/studio-flow-definition-schema.json -o src/lib/studioFlowSchema.ts"
+    "package:check": "ncc -m build src/actions/check/index.ts -o check"
   },
   "jest": {
     "preset": "ts-jest",

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { commands } from "./commands";
+import { exit } from "process";
 
 export const FUNCTION_URL_REGEX = /https:\/\/(\S+)-\d\d\d\d(-(\S+))?\.twil\.io(\/\S*)/;
 
@@ -19,12 +21,14 @@ const runFunctionWidgetSchema = z
       service_sid: z.string().startsWith("ZS"),
       environment_sid: z.string().startsWith("ZE"),
       function_sid: z.string().startsWith("ZH"),
-      parameters: z.array(
-        z.object({
-          key: z.string(),
-          value: z.string(),
-        })
-      ),
+      parameters: z
+        .array(
+          z.object({
+            key: z.string(),
+            value: z.string(),
+          })
+        )
+        .optional(),
       url: z.string().regex(FUNCTION_URL_REGEX, "Functions URL must match regex"),
     }),
   })
@@ -86,16 +90,23 @@ const runSubflowWidgetSchema = z
   })
   .merge(baseWidgetSchema);
 
-export const studioStateSchema = z.discriminatedUnion("type", [
+const studioStateSchema = z.discriminatedUnion("type", [
   runFunctionWidgetSchema,
   sendToFlexWidgetSchema,
   setVariablesWidgetSchema,
   runSubflowWidgetSchema,
 ]);
 
+export const MANAGED_WIDGET_TYPES = [
+  "run-function",
+  "send-to-flex",
+  "set-variables",
+  "run-subflow",
+] as const;
+
 export const studioFlowSchema = z.object({
   description: z.string(),
-  states: z.array(studioStateSchema),
+  states: z.array(z.object({ name: z.string(), type: z.string() }).passthrough()),
   initial_state: z.literal("Trigger"),
   flags: z.object({
     allow_concurrent_calls: z.literal(true),
@@ -104,4 +115,30 @@ export const studioFlowSchema = z.object({
 
 export type StudioFlow = z.infer<typeof studioFlowSchema>;
 
+export type ManagedWidget = z.infer<typeof studioStateSchema>;
+
 export type SendToFlexWidgetAttributes = z.infer<typeof sendToFlexWidgetAttributesSchema>;
+
+export const getManagedWidgets = (flow: StudioFlow) => {
+  const widgets = flow.states
+    .filter((s) => MANAGED_WIDGET_TYPES.includes(s.type as any))
+    .map((s) => {
+      const res = studioStateSchema.safeParse(s);
+      if (!res.success) {
+        const logMessage = `- ${s.name}`;
+        const issueMessages = res.error.issues
+          .map((i) => `\t[${i.path.join(".")}] ${i.message}`)
+          .join("\n");
+
+        commands.logError(`${logMessage}\n${issueMessages}`);
+        return null;
+      } else {
+        return res.data;
+      }
+    });
+
+  if (widgets.some((w) => w === null)) {
+    exit(1);
+  }
+  return widgets as ManagedWidget[];
+};

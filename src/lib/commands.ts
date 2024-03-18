@@ -19,22 +19,20 @@ const applyMasks = (text: string) => {
 const isMasked = (text: string) => maskedValues.some((v) => text.includes(v));
 
 export const commands = {
-  logError: (message: string, properties?: core.AnnotationProperties) => {
+  logError: (message: string) => {
     if (githubActions) {
-      core.error(message, properties);
+      core.error(message);
     } else {
       const logMessage = applyMasks(message);
-      console.error(
-        color.red(`(${properties?.file ?? ""}:${properties?.startLine ?? ""}) ${logMessage}`)
-      );
+      console.error(color.red(logMessage));
     }
   },
-  logWarning: (message: string, properties?: core.AnnotationProperties) => {
+  logWarning: (message: string) => {
     if (githubActions) {
-      core.warning(message, properties);
+      core.warning(message);
     } else {
       const logMessage = color.yellow(applyMasks(message));
-      console.warn(`(${properties?.file ?? ""}:${properties?.startLine ?? ""}) ${logMessage}`);
+      console.warn(logMessage);
     }
   },
   logInfo: (message: string, textColor?: LogColors) => {
@@ -76,7 +74,7 @@ export const commands = {
         value = process.env[inputName]; // Fallback to environment variable
       }
       if (!value) {
-        console.error(
+        core.error(
           `Missing variable '${inputName}'. Add to either Action Inputs or Environment Variables`
         );
         exit(1);
@@ -87,7 +85,7 @@ export const commands = {
       if (value) {
         return value;
       } else {
-        console.error(`Missing Environment Variable: ${inputName}`);
+        console.error(color.red(`Missing Environment Variable: ${inputName}`));
         exit(1);
       }
     }
@@ -122,7 +120,7 @@ export const commands = {
     if (githubActions) {
       core.setFailed(message);
     } else {
-      console.error(applyMasks(message));
+      console.error(color.red(applyMasks(message)));
       exit(1);
     }
   },
