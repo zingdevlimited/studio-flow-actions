@@ -1,9 +1,8 @@
-import { FunctionsMap, getUrlComponents } from "./serverless";
+import { FunctionsMap, getUrlComponents } from "../services/serverless";
 import { ManagedWidget, SendToFlexWidgetAttributes } from "./studio-schemas";
 
 type UpdateWidgetResult = {
   changes: Array<{ widget: string; type: string; field: string; value: string }>;
-  errors: Array<{ widget: string; type: string; error: string }>;
 };
 
 export const updateRunFunctionWidgets = (
@@ -12,29 +11,12 @@ export const updateRunFunctionWidgets = (
 ): UpdateWidgetResult => {
   const type = "run-function";
   const changes = [];
-  const errors = [];
   for (const state of states) {
     if (state.type !== type) continue;
 
-    const urlComponents = getUrlComponents(state.properties.url);
-    if (!urlComponents) {
-      errors.push({
-        widget: state.name,
-        type,
-        error: "URL does not match regex",
-      });
-      continue;
-    }
+    const urlComponents = getUrlComponents(state.properties.url)!;
 
     const serviceObject = functionsMap[urlComponents.serviceName];
-    if (!serviceObject) {
-      errors.push({
-        widget: state.name,
-        type,
-        error: `Unknown Service '${urlComponents.serviceName}'. (Are you missing a 'functionServices' entry in your config file?)`,
-      });
-      continue;
-    }
 
     state.properties.service_sid = serviceObject.serviceSid;
     changes.push({
@@ -54,15 +36,6 @@ export const updateRunFunctionWidgets = (
 
     const functionSid = serviceObject.functions[urlComponents.functionPath];
 
-    if (!functionSid) {
-      errors.push({
-        widget: state.name,
-        type: "run-function",
-        error: `Unknown Function Path '${urlComponents.functionPath}'`,
-      });
-      continue;
-    }
-
     state.properties.function_sid = functionSid;
     changes.push({
       widget: state.name,
@@ -81,7 +54,7 @@ export const updateRunFunctionWidgets = (
     });
   }
 
-  return { changes, errors };
+  return { changes };
 };
 
 export const updateSendToFlexWidgets = (
@@ -91,21 +64,12 @@ export const updateSendToFlexWidgets = (
 ): UpdateWidgetResult => {
   const type = "send-to-flex";
   const changes = [];
-  const errors = [];
   for (const state of states) {
     if (state.type !== type) continue;
 
     const attributes = JSON.parse(state.properties.attributes) as SendToFlexWidgetAttributes;
 
     const channelSid = channelsMap[attributes.channelName];
-    if (!channelSid) {
-      errors.push({
-        widget: state.name,
-        type,
-        error: `Unknown channelName '${attributes.channelName}'. (Must match the uniqueName of an existing TaskChannel)`,
-      });
-      continue;
-    }
     state.properties.channel = channelSid;
     changes.push({
       widget: state.name,
@@ -115,14 +79,6 @@ export const updateSendToFlexWidgets = (
     });
 
     const workflowSid = workflowsMap[attributes.workflowName];
-    if (!workflowSid) {
-      errors.push({
-        widget: state.name,
-        type,
-        error: `Unknown workflowName '${attributes.workflowName}'. (Are you missing a 'workflowMap' entry in your config file?)`,
-      });
-      continue;
-    }
     state.properties.workflow = workflowSid;
     changes.push({
       widget: state.name,
@@ -132,7 +88,7 @@ export const updateSendToFlexWidgets = (
     });
   }
 
-  return { changes, errors };
+  return { changes };
 };
 
 export const updateSetVariableWidgets = (
@@ -160,40 +116,22 @@ export const updateSetVariableWidgets = (
     }
   }
 
-  return { changes, errors: [] };
+  return { changes };
 };
 
 export const updateRunSubflowWidgets = (
   states: ManagedWidget[],
   subflowMap: Record<string, string>
-) => {
+): UpdateWidgetResult => {
   const type = "run-subflow";
   const changes = [];
-  const errors = [];
 
   for (const state of states) {
     if (state.type !== type) continue;
 
-    const subflowName = state.properties.parameters.find((p) => p.key === "subflowName")?.value;
-
-    if (!subflowName) {
-      errors.push({
-        widget: state.name,
-        type,
-        error: "Missing 'subflowName' field in parameters",
-      });
-      continue;
-    }
+    const subflowName = state.properties.parameters.find((p) => p.key === "subflowName")!.value;
 
     const subflowSid = subflowMap[subflowName];
-    if (!subflowSid) {
-      errors.push({
-        widget: state.name,
-        type,
-        error: `Unknown subflowName '${subflowName}'. (Are you missing a 'subflowMap' entry in your config file?)`,
-      });
-      continue;
-    }
 
     state.properties.flow_sid = subflowSid;
     changes.push({
@@ -204,5 +142,5 @@ export const updateRunSubflowWidgets = (
     });
   }
 
-  return { changes, errors };
+  return { changes };
 };

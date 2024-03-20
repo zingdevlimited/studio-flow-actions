@@ -47,6 +47,7 @@ module.exports = {
     "import/prefer-default-export": "off",
     "import/no-default-export": "warn",
     "@typescript-eslint/no-explicit-any": "off",
+    "prefer-const": "off",
 
     // standard extensions shouldn't be named with file extensions, but unusual ones (eg JS/css) should be.
     "import/extensions": [

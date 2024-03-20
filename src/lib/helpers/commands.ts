@@ -67,7 +67,7 @@ export const commands = {
       console.log(color.gray("====="));
     }
   },
-  getInput: (inputName: string) => {
+  getInput: (inputName: string, secret?: boolean) => {
     if (githubActions) {
       let value: string | undefined = core.getInput(inputName);
       if (!value) {
@@ -79,10 +79,16 @@ export const commands = {
         );
         exit(1);
       }
+      if (secret) {
+        commands.maskValue(value);
+      }
       return value;
     } else {
       const value = process.env[inputName];
       if (value) {
+        if (secret) {
+          commands.maskValue(value);
+        }
         return value;
       } else {
         console.error(color.red(`Missing Environment Variable: ${inputName}`));
@@ -122,6 +128,13 @@ export const commands = {
     } else {
       console.error(color.red(applyMasks(message)));
       exit(1);
+    }
+  },
+  writeSummaryTable: (data: string[][]) => {
+    if (githubActions) {
+      // Test
+    } else {
+      console.table(data);
     }
   },
 };

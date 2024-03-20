@@ -10,7 +10,10 @@
   "scripts": {
     "lint": "eslint",
     "package:sync": "ncc -m build src/actions/sync/index.ts -o sync",
-    "package:check": "ncc -m build src/actions/check/index.ts -o check"
+    "package:check": "ncc -m build src/actions/check/index.ts -o check",
+    "package:validate": "ncc -m build src/actions/validate/index.ts -o validate",
+    "package:deploy": "ncc -m build src/actions/deploy/index.ts -o deploy",
+    "package:all": "yarn package:sync && yarn package:check && yarn package:validate && yarn package:deploy"
   },
   "jest": {
     "preset": "ts-jest",

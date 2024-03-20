@@ -1,25 +1,31 @@
-import { existsSync, readFileSync } from "fs";
-import { commands } from "../../lib/commands";
-import { getManagedWidgets, studioFlowSchema } from "../../lib/studio-schemas";
+import { getConfiguration } from "../../lib/helpers/config";
+import { readFileSync } from "fs";
+import { getManagedWidgets, studioFlowSchema } from "../../lib/helpers/studio-schemas";
+import { commands } from "../../lib/helpers/commands";
 
-const run = () => {
-  const localFilePath = commands.getInput("LOCAL_FILE");
-
-  if (!existsSync(localFilePath)) {
-    commands.setFailed(`
-LOCAL_FILE path '${localFilePath}' could not be found.
-Possible causes:
-  - The runner has not checked out the repository with actions/checkout
-  - The path to the file does not begin at the root of the repository
-`);
-    return;
-  }
-
-  const fileContent = readFileSync(localFilePath, "utf8");
-
+const run = async () => {
   try {
-    const studioFlow = studioFlowSchema.passthrough().parse(JSON.parse(fileContent));
-    getManagedWidgets(studioFlow);
+    const configuration = getConfiguration();
+    let success = true;
+
+    for (const flowConfig of configuration.flows) {
+      commands.startLogGroup(flowConfig.name);
+      const flowJsonContent = readFileSync(flowConfig.path, "utf8");
+      const studioFlowDefinition = studioFlowSchema.parse(JSON.parse(flowJsonContent));
+
+      // Run through parser and offline validation
+      const result = getManagedWidgets(studioFlowDefinition, configuration);
+      if (result.some((w) => w === null)) {
+        success = false;
+      } else {
+        commands.logInfo("Passed ✅", "green");
+      }
+      commands.endLogGroup();
+    }
+
+    if (!success) {
+      commands.setFailed("Check failed.");
+    }
   } catch (err) {
     commands.setFailed((err as Error).message);
   }

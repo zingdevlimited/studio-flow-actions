@@ -1,5 +1,5 @@
 import github from "@actions/github";
-import { commands } from "./commands";
+import { commands } from "../helpers/commands";
 
 interface IGithubService {
   commitFiles: (

@@ -1,5 +1,5 @@
 import { Twilio } from "twilio";
-import { FUNCTION_URL_REGEX } from "./studio-schemas";
+import { FUNCTION_URL_REGEX } from "../helpers/studio-schemas";
 
 type ServiceReference = {
   name: string;
@@ -17,9 +17,9 @@ export const getUrlComponents = (url: string) => {
     return null;
   }
   return {
-    serviceName: groups[0],
-    environmentSuffix: groups[2],
-    functionPath: groups[3],
+    serviceName: groups[1],
+    environmentSuffix: groups[3],
+    functionPath: groups[4],
   };
 };
 
