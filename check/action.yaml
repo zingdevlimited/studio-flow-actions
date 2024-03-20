@@ -1,0 +1,11 @@
+name: Check Studio Flow
+description: Offline validation of Studio Flow Definitions against a Studio Configuration file
+
+inputs:
+  CONFIG_PATH:
+    required: true
+    description: The path to the Studio Configuration file
+
+runs:
+  using: node20
+  main: index.js

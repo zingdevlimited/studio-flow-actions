@@ -130,11 +130,11 @@ export const commands = {
       exit(1);
     }
   },
-  writeSummaryTable: (data: string[][]) => {
+  writeSummaryTable: (rows: any[]) => {
     if (githubActions) {
       // Test
     } else {
-      console.table(data);
+      console.table(rows);
     }
   },
 };

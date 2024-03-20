@@ -19,20 +19,22 @@ const baseWidgetSchema = z.object({
 const runFunctionWidgetSchema = z
   .object({
     type: z.literal("run-function"),
-    properties: z.object({
-      service_sid: z.string().startsWith("ZS"),
-      environment_sid: z.string().startsWith("ZE"),
-      function_sid: z.string().startsWith("ZH"),
-      parameters: z
-        .array(
-          z.object({
-            key: z.string(),
-            value: z.string(),
-          })
-        )
-        .optional(),
-      url: z.string(),
-    }),
+    properties: z
+      .object({
+        service_sid: z.string().startsWith("ZS"),
+        environment_sid: z.string().startsWith("ZE"),
+        function_sid: z.string().startsWith("ZH"),
+        parameters: z
+          .array(
+            z.object({
+              key: z.string(),
+              value: z.string(),
+            })
+          )
+          .optional(),
+        url: z.string(),
+      })
+      .passthrough(),
   })
   .merge(baseWidgetSchema);
 
@@ -50,45 +52,53 @@ const sendToFlexWidgetAttributesSchema = z.object({
 const sendToFlexWidgetSchema = z
   .object({
     type: z.literal("send-to-flex"),
-    properties: z.object({
-      waitUrl: z.string().optional(),
-      workflow: z.string().startsWith("WW"),
-      channel: z.string().startsWith("TC"),
-      attributes: z
-        .preprocess((str, ctx) => {
-          try {
-            return JSON.parse(str as string);
-          } catch (e) {
-            ctx.addIssue({ code: "custom", message: "Invalid JSON" });
-            return z.NEVER;
-          }
-        }, sendToFlexWidgetAttributesSchema)
-        .transform((attr) => JSON.stringify(attr)),
-    }),
+    properties: z
+      .object({
+        waitUrl: z.string().optional(),
+        workflow: z.string().startsWith("WW"),
+        channel: z.string().startsWith("TC"),
+        attributes: z
+          .preprocess((str, ctx) => {
+            try {
+              return JSON.parse(str as string);
+            } catch (e) {
+              ctx.addIssue({ code: "custom", message: "Invalid JSON" });
+              return z.NEVER;
+            }
+          }, sendToFlexWidgetAttributesSchema)
+          .transform((attr) => JSON.stringify(attr)),
+      })
+      .passthrough(),
   })
   .merge(baseWidgetSchema);
 
 const setVariablesWidgetSchema = z
   .object({
     type: z.literal("set-variables"),
-    properties: z.object({
-      variables: z.array(z.object({ key: z.string(), value: z.string() })),
-    }),
+    properties: z
+      .object({
+        variables: z.array(z.object({ key: z.string(), value: z.string() })),
+      })
+      .passthrough(),
   })
   .merge(baseWidgetSchema);
 
 const runSubflowWidgetSchema = z
   .object({
     type: z.literal("run-subflow"),
-    properties: z.object({
-      parameters: z
-        .array(z.object({ key: z.string(), value: z.string() }))
-        .refine((params) => params.some((p) => p.key === "subflowName"), {
-          message:
-            "run-subflow attributes must contain 'subflowName' field for deployment purposes",
-        }),
-      flow_sid: z.string().startsWith("FW"),
-    }),
+    properties: z
+      .object({
+        parameters: z
+          .array(z.object({ key: z.string(), value: z.string() }))
+          .default([])
+          .refine((params) => params.some((p) => p.key === "subflowName"), {
+            message:
+              "run-subflow attributes must contain 'subflowName' field for deployment purposes",
+          }),
+        flow_sid: z.string().startsWith("FW"),
+        flow_revision: z.string(),
+      })
+      .passthrough(),
   })
   .merge(baseWidgetSchema);
 
@@ -159,7 +169,7 @@ export const getManagedWidgets = (
               ctx.addIssue({
                 code: "custom",
                 path: ["properties", "url"],
-                message: `Unknown Function Path '${urlComponents.functionPath}'. (Is your Functions Service been deployed?)`,
+                message: `Unknown Function Path '${urlComponents.functionPath}'. (Is your Functions Service deployed?)`,
               });
               return;
             }

@@ -1,16 +1,10 @@
 name: Sync Studio Flow
-description: Download a Studio Flow instance into source control
+description: Download Studio Flow instances into source control
 
 inputs:
-  LOCAL_FILE:
+  CONFIG_PATH:
     required: true
-    description: The path to the flow.json file in the repository
-  FLOW_NAME:
-    required: false
-    description: The friendlyName of the remote Studio Flow. You need to set either this property or FLOW_SID
-  FLOW_SID:
-    required: false
-    description: The sid of the remote Studio Flow. You need to set either this property or FLOW_NAME
+    description: The path to the Studio Configuration file
   TWILIO_API_KEY:
     required: true
     description: The Twilio Api Key

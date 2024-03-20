@@ -24,13 +24,17 @@ export const performReplacements = async (
   );
 
   for (const flowConfig of sortedFlows) {
-    commands.startLogGroup(flowConfig.name);
     const flowJsonContent = readFileSync(flowConfig.path, "utf8");
     const studioFlowDefinition = studioFlowSchema.parse(JSON.parse(flowJsonContent));
 
     const changes = [];
 
-    const managedWidgets = getManagedWidgets(studioFlowDefinition, configuration);
+    const managedWidgets = getManagedWidgets(studioFlowDefinition, configuration, twilioServices);
+
+    if (managedWidgets.some((w) => w === null)) {
+      commands.setFailed("Failed to process managed widgets. Exiting");
+      return [];
+    }
 
     if (configuration.replaceWidgetTypes.includes("run-function")) {
       const res = updateRunFunctionWidgets(managedWidgets, functionMap);
@@ -95,7 +99,6 @@ export const performReplacements = async (
         });
       }
     }
-    commands.endLogGroup();
   }
 
   return results;

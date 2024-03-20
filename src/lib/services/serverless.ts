@@ -1,5 +1,6 @@
 import { Twilio } from "twilio";
 import { FUNCTION_URL_REGEX } from "../helpers/studio-schemas";
+import { exit } from "process";
 
 type ServiceReference = {
   name: string;
@@ -28,33 +29,38 @@ const getServiceFunctions = async (
   uniqueName: string,
   environmentSuffix: string | null
 ) => {
-  const service = await client.serverless.v1.services(uniqueName).fetch();
+  try {
+    const service = await client.serverless.v1.services(uniqueName).fetch();
 
-  const environmentList = await service.environments().list();
-  const environment = environmentList.find((e) => e.domainSuffix === environmentSuffix);
+    const environmentList = await service.environments().list();
+    const environment = environmentList.find((e) => e.domainSuffix === environmentSuffix);
 
-  if (!environment) {
-    throw new Error("Environment not found!");
+    if (!environment) {
+      throw new Error("Environment not found!");
+    }
+
+    const build = await service.builds().get(environment.buildSid).fetch();
+    const functionVersions = (build.functionVersions as FunctionVersion[]).reduce(
+      (prev, curr) => ({
+        ...prev,
+        [curr.path]: curr.sid,
+      }),
+      {} as Record<string, string>
+    );
+
+    return [
+      uniqueName,
+      {
+        serviceSid: service.sid,
+        environmentSid: environment.sid,
+        domainName: environment.domainName,
+        functions: functionVersions,
+      },
+    ] as const;
+  } catch (err) {
+    console.error(err);
+    exit(1);
   }
-
-  const build = await service.builds().get(environment.buildSid).fetch();
-  const functionVersions = (build.functionVersions as FunctionVersion[]).reduce(
-    (prev, curr) => ({
-      ...prev,
-      [curr.path]: curr.sid,
-    }),
-    {} as Record<string, string>
-  );
-
-  return [
-    uniqueName,
-    {
-      serviceSid: service.sid,
-      environmentSid: environment.sid,
-      domainName: environment.domainName,
-      functions: functionVersions,
-    },
-  ] as const;
 };
 
 export const getFunctionServices = async (client: Twilio, services: ServiceReference[]) => {
