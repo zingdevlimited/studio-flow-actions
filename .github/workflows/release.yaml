@@ -1,0 +1,115 @@
+name: Release new version
+
+on:
+  workflow_dispatch:
+    inputs:
+      BUMP_TYPE:
+        description: "Bump Type"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.8.0
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install Dependencies
+        run: yarn install --immutable
+
+      - name: Run Tests
+        run: |
+          yarn lint
+
+      - name: Bump Package Version
+        id: bump
+        run: |
+          oldVersion=$(cat package.json | jq -r .version)
+          npm version ${{ inputs.BUMP_TYPE }} --no-git-tag-version --no-workspaces-update
+          newVersion=$(cat package.json | jq -r .version)
+
+          IFS='.' read -ra verTokens <<< "$newVersion"
+
+          mainTag="v${verTokens[0]}.${verTokens[1]}.${verTokens[2]}"
+          minorTag="v${verTokens[0]}.${verTokens[1]}"
+          majorTag="v${verTokens[0]}"
+          
+          echo "MAIN_TAG=$mainTag" >> "$GITHUB_OUTPUT"
+          echo "MINOR_TAG=$minorTag" >> "$GITHUB_OUTPUT"
+          echo "MAJOR_TAG=$majorTag" >> "$GITHUB_OUTPUT"
+
+          echo "OLD_VERSION=$oldVersion" >> "$GITHUB_OUTPUT"
+          echo "NEW_VERSION=$newVersion" >> "$GITHUB_OUTPUT"
+
+      - name: Update README Version
+        run: |
+          updated=$(cat "README.md" | sed "s/Version: $OLD_VER/Version: $NEW_VER/")
+          echo "$updated" > README.md
+        env:
+          OLD_VER: ${{ steps.bump.outputs.OLD_VERSION }}
+          NEW_VER: ${{ steps.bump.outputs.NEW_VERSION }}
+
+      - name: Output Build
+        run: yarn package:all
+        
+      - name: Commit and Push
+        id: commit
+        uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
+        with:
+          branch: main
+          file_pattern: "package.json README.md **/index.js"
+          commit_message: "auto: Update version to ${{ steps.bump.outputs.NEW_VERSION }} [skip ci]"
+          push_options: "--force"
+
+      - name: Update tags to point to commit
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const commitHash = "${{ env.COMMIT_HASH }}"
+            const tags = [
+              "${{ env.MAIN_TAG }}",
+              "${{ env.MINOR_TAG }}",
+              "${{ env.MAJOR_TAG }}"
+            ];
+            for (const tag of tags) {
+              let ref;
+              try {
+                ref = await github.rest.git.getRef({
+                  ...context.repo,
+                  ref: `tags/${tag}`
+                })
+              } catch (e) {
+                if (e.status === 404) {
+                  // continue
+                }
+              }
+              if (!ref) {
+                await github.rest.git.createRef({
+                  ...context.repo,
+                  ref: `refs/tags/${tag}`,
+                  sha: commitHash
+                });
+              } else {
+                await github.rest.git.updateRef({
+                  ...context.repo,
+                  ref: `tags/${tag}`,
+                  sha: commitHash
+                })
+              }
+            }
+        env:
+          MAIN_TAG: ${{ steps.bump.outputs.MAIN_TAG }}
+          MINOR_TAG: ${{ steps.bump.outputs.MINOR_TAG }}
+          MAJOR_TAG: ${{ steps.bump.outputs.MAJOR_TAG }}
+          COMMIT_HASH: ${{ steps.commit.outputs.commit_hash }}
