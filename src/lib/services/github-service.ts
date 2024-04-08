@@ -1,4 +1,4 @@
-import github from "@actions/github";
+import { getOctokit } from "@actions/github";
 import { commands } from "../helpers/commands";
 
 interface IGithubService {
@@ -14,7 +14,7 @@ interface IGithubService {
 const GH_FILE_MODE = "100644" as const;
 
 export const GithubService = (ghToken: string): IGithubService => {
-  const octokit = github.getOctokit(ghToken).rest;
+  const octokit = getOctokit(ghToken).rest;
 
   const { GITHUB_REPOSITORY, GITHUB_ACTOR, GITHUB_SERVER_URL, GITHUB_REF_NAME, GITHUB_RUN_ID } =
     process.env;
