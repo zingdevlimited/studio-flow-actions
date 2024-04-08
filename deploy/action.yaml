@@ -1,0 +1,21 @@
+name: Deploy Studio Flow
+description: Deploy Studio Flows to a Twilio account based on the configuration file
+
+inputs:
+  CONFIG_PATH:
+    required: true
+    description: The path to the Studio Configuration file
+  TWILIO_API_KEY:
+    required: true
+    description: The Twilio Api Key
+  TWILIO_API_SECRET:
+    required: true
+    description: The Twilio Api Secret
+  TOKEN:
+    required: false
+    description: "A GitHub token with `contents:read` permission (used if required files are not already checked out)"
+    default: ${{ github.token }}
+
+runs:
+  using: node20
+  main: index.js
