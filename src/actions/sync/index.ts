@@ -59,7 +59,7 @@ const run = async () => {
       const body = flowWrites
         .map(
           (f) =>
-            `- ${f.path}\n\t- Friendly Name: ${f.friendlyName}\n\t- Sid: ${f.sid}\n\t- Revision: ${f.revision}`
+            `- \`${f.path}\`\n\t- **Friendly Name**: ${f.friendlyName}\n\t- **Sid**: ${f.sid}\n\t- **Revision**: ${f.revision}`
         )
         .join("\n");
 
