@@ -131,8 +131,15 @@ export const commands = {
     }
   },
   writeSummaryTable: (rows: any[]) => {
+    if (!rows.length) {
+      return;
+    }
     if (githubActions) {
-      // Test
+      const headings = Object.keys(rows[0]);
+      const headerRow = headings.map((h) => ({ header: true, data: h }));
+      const dataRows = rows.map((row) => headings.map((h) => row[h]));
+
+      core.summary.addTable([headerRow, ...dataRows]);
     } else {
       console.table(rows);
     }
