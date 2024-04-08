@@ -7,7 +7,7 @@ inputs:
     description: The path to the Studio Configuration file
   TOKEN:
     required: false
-    description: "A GitHub token with `contents:read` permission (used if config file not already checked out)"
+    description: "A GitHub token with `contents:read` permission (used if required files are not already checked out)"
     default: ${{ github.token }}
 
 runs:
