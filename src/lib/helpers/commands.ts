@@ -71,7 +71,7 @@ export const commands = {
     if (githubActions) {
       let value: string | undefined = core.getInput(inputName);
       if (!value) {
-        value = process.env[inputName]; // Fallback to environment variable
+        value = process.env[inputName]?.trim(); // Fallback to environment variable
       }
       if (!value) {
         core.error(
@@ -84,7 +84,7 @@ export const commands = {
       }
       return value;
     } else {
-      const value = process.env[inputName];
+      const value = process.env[inputName]?.trim();
       if (value) {
         if (secret) {
           commands.maskValue(value);

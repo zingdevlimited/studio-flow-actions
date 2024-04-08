@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { MANAGED_WIDGET_TYPES } from "./studio-schemas";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { commands } from "./commands";
 
 export const configFileSchema = z.object({
@@ -25,6 +25,16 @@ export const configFileSchema = z.object({
   workflowMap: z.record(z.string()).optional(),
   subflowMap: z.record(z.string()).optional(),
   variableReplacements: z.record(z.string()).optional(),
+  customPropertyReplacements: z
+    .array(
+      z.object({
+        flowName: z.string(),
+        widgetName: z.string(),
+        propertyKey: z.string(),
+        propertyValue: z.string(),
+      })
+    )
+    .default([]),
   enableShellVariables: z.boolean().default(false),
 });
 
@@ -42,19 +52,44 @@ const replaceShellVariables = <T>(configuration: T) => {
   return JSON.parse(replacedJson) as T;
 };
 
-export const getConfiguration = () => {
+export const readFileLocalOrRemote = async (path: string) => {
+  let filePath = commands.getInput("CONFIG_PATH");
+  if (filePath.startsWith("./")) {
+    filePath = filePath.substring("./".length);
+  }
+
+  if (!existsSync(path)) {
+    if (process.env.GITHUB_ACTIONS !== "true") {
+      commands.setFailed(`File path '${filePath}' could not be found. Did you forget to checkout?`);
+      return "";
+    }
+
+    const githubToken = commands.getInput("TOKEN", true);
+    const { GITHUB_SHA, GITHUB_REPOSITORY } = process.env;
+
+    const remoteFile = await fetch(
+      `https://${githubToken}@raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${filePath}`
+    );
+
+    if (remoteFile.ok) {
+      const content = await remoteFile.text();
+      writeFileSync(filePath, content, "utf8");
+      return content;
+    } else {
+      commands.setFailed(
+        `File path '${filePath}' could not be found even after an attempted checkout.`
+      );
+      return "";
+    }
+  }
+
+  return readFileSync(filePath, "utf8");
+};
+
+export const getConfiguration = async () => {
   const configPath = commands.getInput("CONFIG_PATH");
 
-  if (!existsSync(configPath)) {
-    commands.setFailed(`
-CONFIG_PATH path '${configPath}' could not be found.
-Possible causes:
-  - The runner has not checked out the repository with actions/checkout
-  - The path to the file does not begin at the root of the repository
-`);
-    return {} as ConfigFile;
-  }
-  const configFileContent = readFileSync(configPath, "utf8");
+  const configFileContent = await readFileLocalOrRemote(configPath);
   const configurationParseResult = configFileSchema.safeParse(JSON.parse(configFileContent));
 
   if (!configurationParseResult.success) {

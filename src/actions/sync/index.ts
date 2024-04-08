@@ -9,7 +9,7 @@ import { GithubService } from "../../lib/services/github-service";
 
 const run = async () => {
   try {
-    const configObject = getConfiguration();
+    const configObject = await getConfiguration();
     const twilioClient = getTwilioClient();
 
     const flowService = await FlowService(twilioClient);

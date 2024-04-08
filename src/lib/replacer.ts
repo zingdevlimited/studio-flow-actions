@@ -1,12 +1,12 @@
-import { readFileSync } from "fs";
 import { commands } from "./helpers/commands";
-import { ConfigFile } from "./helpers/config";
+import { ConfigFile, readFileLocalOrRemote } from "./helpers/config";
 import { studioFlowSchema, getManagedWidgets } from "./helpers/studio-schemas";
 import {
   updateRunFunctionWidgets,
   updateSendToFlexWidgets,
   updateRunSubflowWidgets,
   updateSetVariableWidgets,
+  setWidgetProperty,
 } from "./helpers/widgets";
 import { TwilioServices } from "./prepare-services";
 
@@ -24,7 +24,7 @@ export const performReplacements = async (
   );
 
   for (const flowConfig of sortedFlows) {
-    const flowJsonContent = readFileSync(flowConfig.path, "utf8");
+    const flowJsonContent = await readFileLocalOrRemote(flowConfig.path);
     const studioFlowDefinition = studioFlowSchema.parse(JSON.parse(flowJsonContent));
 
     const changes = [];
@@ -59,6 +59,18 @@ export const performReplacements = async (
     for (const widget of managedWidgets) {
       const stateIndex = studioFlowDefinition.states.findIndex((s) => s.name === widget.name);
       studioFlowDefinition.states[stateIndex!] = widget;
+    }
+
+    for (const customReplacement of configuration.customPropertyReplacements.filter(
+      (r) => r.flowName === flowConfig.name
+    )) {
+      const res = setWidgetProperty(
+        studioFlowDefinition,
+        customReplacement.widgetName,
+        customReplacement.propertyKey,
+        customReplacement.propertyValue
+      );
+      changes.push(...res.changes);
     }
 
     results.push({

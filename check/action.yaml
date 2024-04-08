@@ -5,6 +5,10 @@ inputs:
   CONFIG_PATH:
     required: true
     description: The path to the Studio Configuration file
+  TOKEN:
+    required: false
+    description: "A GitHub token with `contents:read` permission (used if config file not already checked out)"
+    default: ${{ github.token }}
 
 runs:
   using: node20

@@ -6,7 +6,7 @@ import { performReplacements } from "../../lib/replacer";
 
 const run = async () => {
   try {
-    const configuration = getConfiguration();
+    const configuration = await getConfiguration();
     const twilioClient = getTwilioClient();
 
     const twilioServices = await prepareServices(configuration, twilioClient);

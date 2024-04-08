@@ -12,8 +12,9 @@ inputs:
     required: true
     description: The Twilio Api Secret
   TOKEN:
-    required: true
+    required: false
     description: "A GitHub token with `contents:write` and `pullrequests:write` permissions"
+    default: ${{ github.token }}
 
 runs:
   using: node20

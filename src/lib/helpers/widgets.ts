@@ -1,5 +1,5 @@
 import { FunctionsMap, getUrlComponents } from "../services/serverless";
-import { ManagedWidget, SendToFlexWidgetAttributes } from "./studio-schemas";
+import { ManagedWidget, SendToFlexWidgetAttributes, StudioFlow } from "./studio-schemas";
 
 type UpdateWidgetResult = {
   changes: Array<{ widget: string; type: string; field: string; value: string }>;
@@ -143,4 +143,28 @@ export const updateRunSubflowWidgets = (
   }
 
   return { changes };
+};
+
+export const setWidgetProperty = (
+  studioFlowDefinition: StudioFlow,
+  widgetName: string,
+  propertyKey: string,
+  propertyValue: string
+): UpdateWidgetResult => {
+  const stateIndex = studioFlowDefinition.states.findIndex((s) => s.name === widgetName);
+  if (stateIndex < 0) {
+    return { changes: [] };
+  }
+  const state = studioFlowDefinition.states[stateIndex];
+  (state as any).properties[propertyKey] = propertyValue;
+  return {
+    changes: [
+      {
+        widget: widgetName,
+        type: state.type,
+        field: propertyKey,
+        value: propertyValue,
+      },
+    ],
+  };
 };
