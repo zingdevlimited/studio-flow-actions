@@ -125,6 +125,7 @@ export const commands = {
   setFailed: (message: string) => {
     if (githubActions) {
       core.setFailed(message);
+      exit();
     } else {
       console.error(color.red(applyMasks(message)));
       exit(1);
