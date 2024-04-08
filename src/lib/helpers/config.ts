@@ -70,9 +70,13 @@ export const readFileLocalOrRemote = async (path: string) => {
     const { GITHUB_SHA } = process.env;
 
     const content = await githubService.getFileContent(filePath, GITHUB_SHA!);
+
+    console.log(content);
+
     writeFileSync(filePath, content, "utf8");
     return content;
   } else {
+    console.log("file exists");
     return readFileSync(filePath, "utf8");
   }
 };
