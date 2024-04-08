@@ -23,7 +23,7 @@ const runFunctionWidgetSchema = z
       .object({
         service_sid: z.string().startsWith("ZS"),
         environment_sid: z.string().startsWith("ZE"),
-        function_sid: z.string().startsWith("ZH"),
+        function_sid: z.string().startsWith("ZH").or(z.string().startsWith("ZN")),
         parameters: z
           .array(
             z.object({
@@ -136,107 +136,98 @@ export const getManagedWidgets = (
   configuration: ConfigFile,
   twilioServices?: TwilioServices // Online validation
 ) => {
-  const refinedStateSchema = z
-    .discriminatedUnion("type", [
-      runFunctionWidgetSchema,
-      sendToFlexWidgetSchema,
-      setVariablesWidgetSchema,
-      runSubflowWidgetSchema,
-    ])
-    .superRefine((state, ctx) => {
-      switch (state.type) {
-        case "run-function":
-          const urlComponents = getUrlComponents(state.properties.url);
-          if (!urlComponents) {
+  const refinedStateSchema = studioStateSchema.superRefine((state, ctx) => {
+    switch (state.type) {
+      case "run-function":
+        const urlComponents = getUrlComponents(state.properties.url);
+        if (!urlComponents) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["properties", "url"],
+            message: "Functions URL must match regex",
+          });
+          return;
+        }
+        if (!configuration.functionServices?.some((s) => s.name === urlComponents.serviceName)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["properties", "url"],
+            message: `Unknown Service '${urlComponents.serviceName}'. (Are you missing a 'functionServices' entry in your config file?)`,
+          });
+          return;
+        }
+        if (twilioServices) {
+          const serviceObject = twilioServices.functionMap[urlComponents.serviceName];
+          if (!serviceObject?.functions[urlComponents.functionPath]) {
             ctx.addIssue({
               code: "custom",
               path: ["properties", "url"],
-              message: "Functions URL must match regex",
+              message: `Unknown Function Path '${urlComponents.functionPath}'. (Is your Functions Service deployed?)`,
             });
             return;
           }
-          if (!configuration.functionServices?.some((s) => s.name === urlComponents.serviceName)) {
+        }
+        return;
+      case "send-to-flex":
+        if (twilioServices) {
+          const attributes = JSON.parse(state.properties.attributes) as SendToFlexWidgetAttributes;
+
+          if (!twilioServices.channelMap[attributes.channelName]) {
             ctx.addIssue({
               code: "custom",
-              path: ["properties", "url"],
-              message: `Unknown Service '${urlComponents.serviceName}'. (Are you missing a 'functionServices' entry in your config file?)`,
+              path: ["properties", "attributes", "channelName"],
+              message: `Unknown channelName '${attributes.channelName}'. (Must match the uniqueName of an existing TaskChannel)`,
+            });
+          }
+          if (!twilioServices.workflowMap[attributes.workflowName]) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["properties", "attributes", "workflowName"],
+              message: `Unknown workflowName '${attributes.workflowName}'. (Must match either a Friendly Name OR the key of a 'workflowMap' entry in your config file)`,
+            });
+          }
+        }
+        return;
+      case "run-subflow":
+        if (twilioServices) {
+          const subflowName = state.properties.parameters.find(
+            (p) => p.key === "subflowName"
+          )?.value;
+
+          if (!subflowName) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["properties", "parameters"],
+              message: "Parameters must contain 'subflowName' field for deployment purposes",
             });
             return;
           }
-          if (twilioServices) {
-            const serviceObject = twilioServices.functionMap[urlComponents.serviceName];
-            if (!serviceObject?.functions[urlComponents.functionPath]) {
-              ctx.addIssue({
-                code: "custom",
-                path: ["properties", "url"],
-                message: `Unknown Function Path '${urlComponents.functionPath}'. (Is your Functions Service deployed?)`,
-              });
-              return;
-            }
+
+          const futureSubflows = configuration.flows
+            .filter((f) => f.subflow && f.allowCreate)
+            .reduce(
+              (prev, curr) => ({
+                ...prev,
+                [curr.name]: "FW:FUTURE_VALUE",
+              }),
+              {} as Record<string, string>
+            );
+
+          const subflowMap = { ...futureSubflows, ...twilioServices.studioFlowMap };
+
+          if (!subflowMap[subflowName]) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["properties", "parameters", "subflowName"],
+              message: `Unknown subflowName '${subflowName}'. (Must match either a Friendly Name OR the name of a subflow with 'allowCreate' enabled OR the key of a 'subflowMap' entry in your config file)`,
+            });
           }
-          return;
-        case "send-to-flex":
-          if (twilioServices) {
-            const attributes = JSON.parse(
-              state.properties.attributes
-            ) as SendToFlexWidgetAttributes;
-
-            if (!twilioServices.channelMap[attributes.channelName]) {
-              ctx.addIssue({
-                code: "custom",
-                path: ["properties", "attributes", "channelName"],
-                message: `Unknown channelName '${attributes.channelName}'. (Must match the uniqueName of an existing TaskChannel)`,
-              });
-            }
-            if (!twilioServices.workflowMap[attributes.workflowName]) {
-              ctx.addIssue({
-                code: "custom",
-                path: ["properties", "attributes", "workflowName"],
-                message: `Unknown workflowName '${attributes.workflowName}'. (Must match either a Friendly Name OR the key of a 'workflowMap' entry in your config file)`,
-              });
-            }
-          }
-          return;
-        case "run-subflow":
-          if (twilioServices) {
-            const subflowName = state.properties.parameters.find(
-              (p) => p.key === "subflowName"
-            )?.value;
-
-            if (!subflowName) {
-              ctx.addIssue({
-                code: "custom",
-                path: ["properties", "parameters"],
-                message: "Parameters must contain 'subflowName' field for deployment purposes",
-              });
-              return;
-            }
-
-            const futureSubflows = configuration.flows
-              .filter((f) => f.subflow && f.allowCreate)
-              .reduce(
-                (prev, curr) => ({
-                  ...prev,
-                  [curr.name]: "FW:FUTURE_VALUE",
-                }),
-                {} as Record<string, string>
-              );
-
-            const subflowMap = { ...futureSubflows, ...twilioServices.studioFlowMap };
-
-            if (!subflowMap[subflowName]) {
-              ctx.addIssue({
-                code: "custom",
-                path: ["properties", "parameters", "subflowName"],
-                message: `Unknown subflowName '${subflowName}'. (Must match either a Friendly Name OR the name of a subflow with 'allowCreate' enabled OR the key of a 'subflowMap' entry in your config file)`,
-              });
-            }
-          }
-          break;
-        default:
-          return;
-      }
-    });
+        }
+        return;
+      default:
+        return;
+    }
+  });
 
   const widgets = flow.states
     .filter((s) => MANAGED_WIDGET_TYPES.includes(s.type as any))
