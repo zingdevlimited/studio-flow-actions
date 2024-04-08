@@ -7,23 +7,25 @@ import { FlowInstance } from "twilio/lib/rest/studio/v2/flow";
 import { getConfiguration } from "../../lib/helpers/config";
 import { GithubService } from "../../lib/services/github-service";
 import { dirname } from "path";
+import { getManagedWidgets, studioFlowSchema } from "../../lib/helpers/studio-schemas";
 
 const run = async () => {
   try {
-    const configObject = await getConfiguration();
+    let success = true;
+    const configuration = await getConfiguration();
     const twilioClient = getTwilioClient();
 
     const flowService = await FlowService(twilioClient);
 
     const flowWrites = [];
 
-    for (const flow of configObject.flows) {
-      commands.startLogGroup(flow.name);
+    for (const flowConfig of configuration.flows) {
+      commands.startLogGroup(flowConfig.name);
       let flowInstance: FlowInstance;
-      if (!flow.sid) {
-        flowInstance = flowService.byName(flow.name);
+      if (!flowConfig.sid) {
+        flowInstance = flowService.byName(flowConfig.name);
       } else {
-        flowInstance = flowService.bySid(flow.sid);
+        flowInstance = flowService.bySid(flowConfig.sid);
       }
       const friendlyName = flowInstance.friendlyName;
       const sid = flowInstance.sid;
@@ -32,15 +34,28 @@ const run = async () => {
 
       const fileContent = JSON.stringify(definition, undefined, 2);
 
-      const dirName = dirname(flow.path);
+      if (commands.getOptionalInput("DISABLE_CHECK") !== "true") {
+        const studioFlowDefinition = studioFlowSchema.parse(definition);
+        // Run through parser and offline validation
+        const result = getManagedWidgets(studioFlowDefinition, configuration);
+        if (result.some((w) => w === null)) {
+          success = false;
+        }
+      }
+
+      const dirName = dirname(flowConfig.path);
       mkdirSync(dirName, { recursive: true });
-      writeFileSync(flow.path, fileContent, "utf8");
-      flowWrites.push({ path: flow.path, friendlyName, sid, revision, content: fileContent });
+      writeFileSync(flowConfig.path, fileContent, "utf8");
+      flowWrites.push({ path: flowConfig.path, friendlyName, sid, revision, content: fileContent });
 
       commands.logInfo(
-        `Updated ${color.blue(flow.path)} from ${color.yellow(friendlyName)}/${color.magenta(sid)} Revision ${color.cyan(revision.toString())}`
+        `Updated ${color.blue(flowConfig.path)} from ${color.yellow(friendlyName)}/${color.magenta(sid)} Revision ${color.cyan(revision.toString())}`
       );
       commands.endLogGroup();
+    }
+
+    if (!success) {
+      commands.setFailed("Check failed.");
     }
 
     if (process.env.GITHUB_REPOSITORY) {
