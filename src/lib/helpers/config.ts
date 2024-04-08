@@ -53,12 +53,12 @@ const replaceShellVariables = <T>(configuration: T) => {
 };
 
 export const readFileLocalOrRemote = async (path: string) => {
-  let filePath = commands.getInput("CONFIG_PATH");
+  let filePath = path;
   if (filePath.startsWith("./")) {
     filePath = filePath.substring("./".length);
   }
 
-  if (!existsSync(path)) {
+  if (!existsSync(filePath)) {
     if (process.env.GITHUB_ACTIONS !== "true") {
       commands.setFailed(`File path '${filePath}' could not be found. Did you forget to checkout?`);
       return "";
@@ -66,6 +66,10 @@ export const readFileLocalOrRemote = async (path: string) => {
 
     const githubToken = commands.getInput("TOKEN", true);
     const { GITHUB_SHA, GITHUB_REPOSITORY } = process.env;
+
+    console.log(
+      `Fetching https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${encodeURIComponent(filePath)}`
+    );
 
     const remoteFile = await fetch(
       `https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${encodeURIComponent(filePath)}`,
@@ -86,9 +90,9 @@ export const readFileLocalOrRemote = async (path: string) => {
       );
       return "";
     }
+  } else {
+    return readFileSync(filePath, "utf8");
   }
-
-  return readFileSync(filePath, "utf8");
 };
 
 export const getConfiguration = async () => {
