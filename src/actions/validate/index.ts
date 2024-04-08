@@ -17,7 +17,9 @@ const run = async () => {
 
     for (const replacement of replacements) {
       commands.startLogGroup(replacement.flow.name);
-      commands.writeSummaryTable(replacement.changes);
+
+      commands.addSummaryHeader(`Flow \`${replacement.flow.name}\`:`);
+      commands.addSummaryTable(replacement.changes);
       try {
         const validation = await twilioClient.studio.v2.flowValidate.update({
           friendlyName: replacement.flow.name,
@@ -44,6 +46,7 @@ const run = async () => {
       }
       commands.endLogGroup();
     }
+    await commands.writeSummary();
     if (!success) {
       commands.setFailed("Validation failed.");
     }

@@ -13,9 +13,11 @@ const run = async () => {
 
     const results = await performReplacements(configuration, twilioServices, "deploy");
 
-    commands.writeSummaryTable(
-      results.flatMap((r) => r.changes.map((c) => [c.widget, c.type, c.field, c.value]))
-    );
+    for (const result of results) {
+      commands.addSummaryHeader(`Flow \`${result.flow.name}\`:`);
+      commands.addSummaryTable(result.changes);
+    }
+    await commands.writeSummary();
   } catch (err) {
     commands.setFailed((err as Error).message);
   }

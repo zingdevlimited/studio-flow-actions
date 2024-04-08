@@ -130,7 +130,14 @@ export const commands = {
       exit(1);
     }
   },
-  writeSummaryTable: (rows: any[]) => {
+  addSummaryHeader: async (header: string) => {
+    if (githubActions) {
+      core.summary.addRaw(`## ${header}`);
+    } else {
+      console.log(`## ${color.gray(header)}`);
+    }
+  },
+  addSummaryTable: (rows: any[]) => {
     if (!rows.length) {
       return;
     }
@@ -140,12 +147,13 @@ export const commands = {
       const dataRows = rows.map((row) => headings.map((h) => row[h]));
 
       core.summary.addTable([headerRow, ...dataRows]);
-      console.log(headerRow);
-      console.log(dataRows);
-
-      console.table(rows);
     } else {
       console.table(rows);
+    }
+  },
+  writeSummary: async () => {
+    if (githubActions) {
+      await core.summary.write();
     }
   },
 };
