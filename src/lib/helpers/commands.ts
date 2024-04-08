@@ -140,6 +140,10 @@ export const commands = {
       const dataRows = rows.map((row) => headings.map((h) => row[h]));
 
       core.summary.addTable([headerRow, ...dataRows]);
+      console.log(headerRow);
+      console.log(dataRows);
+
+      console.table(rows);
     } else {
       console.table(rows);
     }
