@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { MANAGED_WIDGET_TYPES } from "./studio-schemas";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { commands } from "./commands";
 import { GithubService } from "../services/github-service";
+import { dirname } from "path";
 
 export const configFileSchema = z.object({
   flows: z.array(
@@ -71,12 +72,11 @@ export const readFileLocalOrRemote = async (path: string) => {
 
     const content = await githubService.getFileContent(filePath, GITHUB_SHA!);
 
-    console.log(content);
-
+    const dirName = dirname(filePath);
+    mkdirSync(dirName, { recursive: true });
     writeFileSync(filePath, content, "utf8");
     return content;
   } else {
-    console.log("file exists");
     return readFileSync(filePath, "utf8");
   }
 };
