@@ -3,6 +3,7 @@ import { commands } from "./commands";
 import { ConfigFile } from "./config";
 import { getUrlComponents } from "../services/serverless";
 import { TwilioServices } from "../prepare-services";
+import color from "ansi-colors";
 
 export const FUNCTION_URL_REGEX = /https:\/\/(\S+)-\d\d\d\d(-(\S+))?\.twil\.io(\/\S*)/;
 
@@ -236,7 +237,7 @@ export const getManagedWidgets = (
       if (!res.success) {
         const logMessage = `- ${s.name}`;
         const issueMessages = res.error.issues
-          .map((i) => `    [${i.path.join(".")}] ${i.message}`)
+          .map((i) => `    ${color.yellow("[" + i.path.join(".") + "]")} ${i.message}`)
           .join("\n");
 
         commands.logError(`${logMessage}\n${issueMessages}`);
