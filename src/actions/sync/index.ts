@@ -1,11 +1,12 @@
 import { commands } from "../../lib/helpers/commands";
 import { getTwilioClient } from "../../lib/helpers/twilio-client";
-import { writeFileSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import color from "ansi-colors";
 import { FlowService } from "../../lib/services/flow-service";
 import { FlowInstance } from "twilio/lib/rest/studio/v2/flow";
 import { getConfiguration } from "../../lib/helpers/config";
 import { GithubService } from "../../lib/services/github-service";
+import { dirname } from "path";
 
 const run = async () => {
   try {
@@ -31,6 +32,8 @@ const run = async () => {
 
       const fileContent = JSON.stringify(definition, undefined, 2);
 
+      const dirName = dirname(flow.path);
+      mkdirSync(dirName, { recursive: true });
       writeFileSync(flow.path, fileContent, "utf8");
       flowWrites.push({ path: flow.path, friendlyName, sid, revision, content: fileContent });
 
