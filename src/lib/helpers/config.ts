@@ -68,7 +68,12 @@ export const readFileLocalOrRemote = async (path: string) => {
     const { GITHUB_SHA, GITHUB_REPOSITORY } = process.env;
 
     const remoteFile = await fetch(
-      `https://${githubToken}@raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${filePath}`
+      `https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${encodeURIComponent(filePath)}`,
+      {
+        headers: {
+          Authorization: `token ${githubToken}`,
+        },
+      }
     );
 
     if (remoteFile.ok) {
