@@ -2,6 +2,7 @@ import { z } from "zod";
 import { MANAGED_WIDGET_TYPES } from "./studio-schemas";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { commands } from "./commands";
+import { GithubService } from "../services/github-service";
 
 export const configFileSchema = z.object({
   flows: z.array(
@@ -65,31 +66,12 @@ export const readFileLocalOrRemote = async (path: string) => {
     }
 
     const githubToken = commands.getInput("TOKEN", true);
-    const { GITHUB_SHA, GITHUB_REPOSITORY } = process.env;
+    const githubService = GithubService(githubToken);
+    const { GITHUB_SHA } = process.env;
 
-    console.log(
-      `Fetching https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${encodeURIComponent(filePath)}`
-    );
-
-    const remoteFile = await fetch(
-      `https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${encodeURIComponent(filePath)}`,
-      {
-        headers: {
-          Authorization: `token ${githubToken}`,
-        },
-      }
-    );
-
-    if (remoteFile.ok) {
-      const content = await remoteFile.text();
-      writeFileSync(filePath, content, "utf8");
-      return content;
-    } else {
-      commands.setFailed(
-        `File path '${filePath}' could not be found even after an attempted checkout.`
-      );
-      return "";
-    }
+    const content = await githubService.getFileContent(filePath, GITHUB_SHA!);
+    writeFileSync(filePath, content, "utf8");
+    return content;
   } else {
     return readFileSync(filePath, "utf8");
   }

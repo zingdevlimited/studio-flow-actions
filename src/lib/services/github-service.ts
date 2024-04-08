@@ -8,6 +8,7 @@ interface IGithubService {
     message: string
   ) => Promise<void>;
   openPullRequest: (branch: string, title: string, body: string) => Promise<void>;
+  getFileContent: (path: string, tag: string) => Promise<string>;
 }
 
 const GH_FILE_MODE = "100644" as const;
@@ -71,6 +72,16 @@ export const GithubService = (ghToken: string): IGithubService => {
         body: `${body}\n\nGenerated from run: <${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}>`,
       });
       commands.logInfo(`Created Pull Request: ${pullRequest.data.html_url}`);
+    },
+    getFileContent: async (path, tag) => {
+      const contentResponse = await octokit.repos.getContent({
+        owner,
+        repo,
+        path,
+        tag,
+      });
+      const content = Buffer.from((contentResponse.data as any).content, "base64").toString();
+      return content;
     },
   };
 };
