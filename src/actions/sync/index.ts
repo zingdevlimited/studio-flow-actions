@@ -40,6 +40,7 @@ const run = async () => {
         const result = getManagedWidgets(studioFlowDefinition, configuration);
         if (result.some((w) => w === null)) {
           success = false;
+          continue;
         }
       }
 
