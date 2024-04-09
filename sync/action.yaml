@@ -1,5 +1,5 @@
 name: Sync Studio Flow
-description: Download Studio Flow instances into source control
+description: Download Studio Flow instances into source control ([Documentation](https://github.com/zingdevlimited/studio-flow-actions/blob/v1/README.md#sync))
 
 inputs:
   CONFIG_PATH:
