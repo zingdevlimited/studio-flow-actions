@@ -105,7 +105,6 @@ This action will:
 2. Replace all account-specific values in the Flow Definition JSONs
 3. Create/Update the Studio Flows in the account specified
 
-
 ```yaml
 jobs:
   deploy:

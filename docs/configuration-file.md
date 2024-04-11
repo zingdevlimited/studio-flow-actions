@@ -4,6 +4,7 @@ Add the Studio Flows you want to deploy to the `flows` list:
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/main/config-schema.json",
   "flows": [
     {
       "name": "main-call-flow",
@@ -36,7 +37,7 @@ Update Set Variables widgets to replace every occurrence of a flow variable.
 
 ```json
 {
-  (...),
+  "flows": [(...)],
   "enableShellVariables": true,
   "replaceWidgetTypes": [
     "set-variables"
@@ -57,7 +58,7 @@ The base URL in your Flow JSON is used to match the widget to the correct Functi
 
 ```json
 {
-  (...),
+  "flows": [(...)],
   "replaceWidgetTypes": [
     "run-function"
   ],
@@ -82,7 +83,7 @@ Using the Studio Flow Editor, you need to add `subflowName` to the flow paramete
 
 ```json
 {
-  (...),
+  "flows": [(...)],
   "replaceWidgetTypes": [
     "run-subflow"
   ]
@@ -95,7 +96,7 @@ Set the `subflowName` parameter to match the Studio Subflow **Friendly Name**.
 
 ```json
 {
-  (...),
+  "flows": [(...)],
   "enableShellVariables": true,
   "replaceWidgetTypes": [
     "run-subflow"
@@ -118,7 +119,7 @@ Using the Studio Flow Editor, you need to add `workflowName` and `channelName` t
 
 ```json
 {
-  (...),
+  "flows": [(...)],
   "replaceWidgetTypes": [
     "send-to-flex"
   ]
@@ -131,7 +132,7 @@ Set the `workflowName` attribute to match the Workflow **Friendly Name**, and th
 
 ```json
 {
-  (...),
+  "flows": [(...)],
   "enableShellVariables": true,
   "replaceWidgetTypes": [
     "send-to-flex"
@@ -153,7 +154,7 @@ steps:
   (...)
 
   - name: Update Studio Flows
-    uses: zingdevlimited/actions-helpers/update-studio-flows@v3
+    uses: zingdevlimited/studio-flow-actions/deploy@v1
     with:
       CONFIG_PATH: studioconfig.json
       TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
