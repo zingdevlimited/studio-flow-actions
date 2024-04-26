@@ -15,7 +15,7 @@ You can get autocomplete in your IDE by setting the `$schema` variable in your f
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/main/config-schema.json",
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [],
   "replaceWidgetTypes": []
 }

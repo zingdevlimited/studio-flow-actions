@@ -4,7 +4,7 @@ Add the Studio Flows you want to deploy to the `flows` list:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/main/config-schema.json",
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [
     {
       "name": "main-call-flow",
@@ -37,6 +37,7 @@ Update Set Variables widgets to replace every occurrence of a flow variable.
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [(...)],
   "enableShellVariables": true,
   "replaceWidgetTypes": [
@@ -58,6 +59,7 @@ The base URL in your Flow JSON is used to match the widget to the correct Functi
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [(...)],
   "replaceWidgetTypes": [
     "run-function"
@@ -83,6 +85,7 @@ Using the Studio Flow Editor, you need to add `subflowName` to the flow paramete
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [(...)],
   "replaceWidgetTypes": [
     "run-subflow"
@@ -96,6 +99,7 @@ Set the `subflowName` parameter to match the Studio Subflow **Friendly Name**.
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [(...)],
   "enableShellVariables": true,
   "replaceWidgetTypes": [
@@ -119,6 +123,7 @@ Using the Studio Flow Editor, you need to add `workflowName` and `channelName` t
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [(...)],
   "replaceWidgetTypes": [
     "send-to-flex"
@@ -132,6 +137,7 @@ Set the `workflowName` attribute to match the Workflow **Friendly Name**, and th
 
 ```json
 {
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
   "flows": [(...)],
   "enableShellVariables": true,
   "replaceWidgetTypes": [
@@ -153,7 +159,7 @@ If you set `enableShellVariables` to true, you can use **\$VARIABLE_NAME** refer
 steps:
   (...)
 
-  - name: Update Studio Flows
+  - name: Deploy Studio Flows
     uses: zingdevlimited/studio-flow-actions/deploy@v1
     with:
       CONFIG_PATH: studioconfig.json
