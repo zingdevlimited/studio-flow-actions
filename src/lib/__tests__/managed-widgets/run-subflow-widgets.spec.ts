@@ -2,6 +2,8 @@ import { ManagedWidget, StudioFlow, getManagedWidgets } from "../../helpers/stud
 import { ConfigFile } from "../../helpers/config";
 import { TwilioServices } from "../../prepare-services";
 
+jest.mock("../../helpers/commands");
+
 const configuration: ConfigFile = {
   flows: [
     {
