@@ -2,7 +2,7 @@
   "name": "studio-flow-actions",
   "description": "Studio Flow Actions",
   "packageManager": "yarn@4.1.1",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=20.8.0"
