@@ -1,5 +1,5 @@
 name: Validate Studio Flow
-description: Online Validation of Studio Flow Definitions against the Twilio Flow Validation API. Ensures referenced resources also exist
+description: Online Validation of Studio Flow Definitions against the Twilio Flow Validation API. Ensures referenced resources also exist (([Documentation](https://github.com/zingdevlimited/studio-flow-actions/blob/v1/README.md#validate)))
 
 inputs:
   CONFIG_PATH:

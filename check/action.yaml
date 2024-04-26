@@ -1,5 +1,5 @@
 name: Check Studio Flow
-description: Offline validation of Studio Flow Definitions against a Studio Configuration file
+description: Offline validation of Studio Flow Definitions ([Documentation](https://github.com/zingdevlimited/studio-flow-actions/blob/v1/README.md#check))
 
 inputs:
   CONFIG_PATH:

@@ -1,5 +1,5 @@
 name: Deploy Studio Flow
-description: Deploy Studio Flows to a Twilio account based on the configuration file
+description: Deploy Studio Flows to a Twilio account ([Documentation](https://github.com/zingdevlimited/studio-flow-actions/blob/v1/README.md#deploy))
 
 inputs:
   CONFIG_PATH:
