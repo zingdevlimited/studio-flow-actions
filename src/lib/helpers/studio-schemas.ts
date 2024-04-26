@@ -196,11 +196,7 @@ export const getManagedWidgets = (
           )?.value;
 
           if (!subflowName) {
-            ctx.addIssue({
-              code: "custom",
-              path: ["properties", "parameters"],
-              message: "Parameters must contain 'subflowName' field for deployment purposes",
-            });
+            // Issue already created further up scope
             return;
           }
 

@@ -13,6 +13,7 @@
     "run:check": "node check/index.js",
     "run:validate": "node validate/index.js",
     "run:deploy": "node deploy/index.js",
+    "test": "jest",
     "package:sync": "ncc -m build src/actions/sync/index.ts -o sync",
     "package:check": "ncc -m build src/actions/check/index.ts -o check",
     "package:validate": "ncc -m build src/actions/validate/index.ts -o validate",
