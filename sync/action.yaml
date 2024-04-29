@@ -12,8 +12,8 @@ inputs:
     required: true
     description: The Twilio Api Secret
   DISABLE_CHECK:
-    reuqired: false
-    description: Set to **true** to disable the Check action from being ran as part of Sync 
+    required: false
+    description: Set to **true** to disable the Check action from being ran as part of Sync
   TOKEN:
     required: false
     description: "A GitHub token with `contents:write` and `pullrequests:write` permissions"
