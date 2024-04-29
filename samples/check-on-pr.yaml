@@ -1,0 +1,17 @@
+name: "Check Studio Flows on PR"
+
+on:
+  pull_request:
+    paths:
+      - studio-flows/*.json
+      - studioconfig.json
+    branches:
+      - main
+
+jobs:
+  check_flows:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: zingdevlimited/studio-flow-actions/check@v1
+        with:
+          CONFIG_PATH: studioconfig.json
