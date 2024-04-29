@@ -1,0 +1,47 @@
+# Parameterized Template for using the Actions in Azure Pipelines
+parameters:
+  - name: ACTION
+    type: string
+    values:
+      - sync
+      - check
+      - validate
+      - deploy
+  - name: TAG
+    type: string
+    default: v1
+  - name: CONFIG_PATH
+    type: string
+  - name: TWILIO_API_KEY
+    type: string
+    default: " "
+  - name: TWILIO_API_SECRET
+    type: string
+    default: " "
+  - name: ENV_VARS
+    type: object
+    default: {}
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: UseNode@1
+    inputs:
+      version: 20.x
+    displayName: Setup Node 20
+
+  - script: |
+      content=$(curl -sX GET "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/${{ parameters.TAG }}/${{ parameters.ACTION }}/index.js")
+      echo "$content" > TEMP_ACTION_${{ parameters.ACTION }}_${{ parameters.TAG }}.js
+    displayName: Fetch Action ${{ parameters.ACTION }}
+
+  - script: node TEMP_ACTION_${{ parameters.ACTION }}_${{ parameters.TAG }}.js
+    display: Run Action ${{ parameters.ACTION }}
+    env:
+      CONFIG_PATH: ${{ parameters.CONFIG_PATH }}
+      TWILIO_API_KEY: ${{ parameters.TWILIO_API_KEY }}
+      TWILIO_API_SECRET: ${{ parameters.TWILIO_API_SECRET }}
+      ${{ each envVar in parameters.ENV_VARS }}:
+        ${{ insert }}:
+          ${{ envVar.key }}: ${{ envVar.value }}

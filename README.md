@@ -119,3 +119,13 @@ jobs:
         env:
           ASSETS_BASE_URL: https://myassets-1234.twil.io
 ```
+
+## Samples
+
+- [Sync on Dispatch](samples/sync-on-dispatch.yaml)
+- [Check on PR](samples/check-on-pr.yaml)
+- [Validate and Deploy](samples/validate-and-deploy.yaml)
+
+## Running Outside of GitHub Actions
+
+See [Alternate Runners](docs/alternate-runners.md) for ways to run this program outside of GitHub actions.
