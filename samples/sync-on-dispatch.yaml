@@ -1,0 +1,21 @@
+name: "Sync Studio Flows from Develop"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  sync_flows:
+    runs-on: ubuntu-22.04
+    env:
+      TWILIO_API_KEY: ${{ vars.DEVELOP_TWILIO_API_KEY }}
+      TWILIO_API_SECRET: ${{ secrets.DEVELOP_TWILIO_API_SECRET }}
+    steps:
+      - uses: zingdevlimited/studio-flow-actions/sync@v1
+        with:
+          CONFIG_PATH: studioconfig.json
+          TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
+          TWILIO_API_SECRET: ${{ env.TWILIO_API_SECRET }}

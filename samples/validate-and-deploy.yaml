@@ -1,0 +1,39 @@
+on:
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: Environment
+        type: choice
+        options:
+          - develop
+          - uat
+          - production
+
+env:
+  TWILIO_API_KEY: ${{ vars[format('{0}_TWILIO_API_KEY', inputs.ENVIRONMENT)] }}
+  TWILIO_API_SECRET: ${{ secrets[format('{0}_TWILIO_API_SECRET', inputs.ENVIRONMENT)] }}
+          
+jobs:
+  validate:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: zingdevlimited/studio-flow-actions/validate@v1
+        with:
+          CONFIG_PATH: studioconfig.json
+          TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
+          TWILIO_API_SECRET: ${{ env.TWILIO_API_SECRET }}
+        env:
+          ASSETS_BASE_URL: https://yourassets.com
+  # Based on GitHub tier this can be delayed with manual check
+  deploy:
+    needs: validate
+    runs-on: ubuntu-22.04
+    steps:
+      # Ensure the same inputs are used as the validate step
+      - uses: zingdevlimited/studio-flow-actions/deploy@v1 
+        with:
+          CONFIG_PATH: studioconfig.json
+          TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
+          TWILIO_API_SECRET: ${{ env.TWILIO_API_SECRET }}
+        env:
+          ASSETS_BASE_URL: https://yourassets.com
