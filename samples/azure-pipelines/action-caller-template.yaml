@@ -22,9 +22,6 @@ parameters:
     type: object
     default: {}
 
-pool:
-  vmImage: ubuntu-latest
-
 steps:
   - task: UseNode@1
     inputs:
@@ -37,7 +34,7 @@ steps:
     displayName: Fetch Action ${{ parameters.ACTION }}
 
   - script: node TEMP_ACTION_${{ parameters.ACTION }}_${{ parameters.TAG }}.js
-    display: Run Action ${{ parameters.ACTION }}
+    displayName: Run Action ${{ parameters.ACTION }}
     env:
       CONFIG_PATH: ${{ parameters.CONFIG_PATH }}
       TWILIO_API_KEY: ${{ parameters.TWILIO_API_KEY }}
