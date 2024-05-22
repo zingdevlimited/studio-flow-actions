@@ -53,16 +53,14 @@ export const configFileSchema = z.object({
 
 export type ConfigFile = z.infer<typeof configFileSchema>;
 
-const replaceShellVariables = <T>(configuration: T) => {
+const replaceShellVariables = (configurationString: string) => {
   const envVarRegex = /\$([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
-  const configJson = JSON.stringify(configuration);
-
-  const replacedJson = configJson.replace(envVarRegex, (_, variable) => {
+  const replacedJson = configurationString.replace(envVarRegex, (_, variable) => {
     return process.env[variable] || "";
   });
 
-  return JSON.parse(replacedJson) as T;
+  return replacedJson;
 };
 
 export const readFileLocalOrRemote = async (filePath: string) => {
@@ -93,7 +91,12 @@ export const getConfiguration = async () => {
     configPath = configPath.substring("./".length);
   }
 
-  const configFileContent = await readFileLocalOrRemote(configPath);
+  let configFileContent = await readFileLocalOrRemote(configPath);
+
+  if (JSON.parse(configFileContent).enableShellVariables) {
+    configFileContent = replaceShellVariables(configFileContent);
+  }
+
   const configurationParseResult = configFileSchema.safeParse(JSON.parse(configFileContent));
 
   if (!configurationParseResult.success) {
@@ -103,10 +106,6 @@ export const getConfiguration = async () => {
     return {} as ConfigFile;
   }
   let configuration = configurationParseResult.data;
-
-  if (configuration.enableShellVariables) {
-    configuration = replaceShellVariables(configuration);
-  }
 
   return configuration;
 };
