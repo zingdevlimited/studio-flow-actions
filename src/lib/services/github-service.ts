@@ -22,11 +22,17 @@ export const GithubService = (ghToken: string): IGithubService => {
 
   return {
     commitFiles: async (files, branch, message) => {
+      commands.logDebug(
+        `GithubService: Commit files '${files.map((f) => f.path).join(",")}' to '${branch}'`
+      );
+
       const fileListTree = files.map((f) => ({
         path: f.path,
         mode: GH_FILE_MODE,
         content: f.content,
       }));
+
+      commands.logDebug("...List commits");
 
       const commits = await octokit.repos.listCommits({
         owner,
@@ -36,12 +42,16 @@ export const GithubService = (ghToken: string): IGithubService => {
       const latestCommitSha = commits.data[0].sha;
       const treeSha = commits.data[0].commit.tree.sha;
 
+      commands.logDebug(`...Create tree ${treeSha}`);
+
       const newTree = await octokit.git.createTree({
         owner,
         repo,
         tree: fileListTree,
         base_tree: treeSha,
       });
+
+      commands.logDebug(`...Create commit ${newTree.data.sha} under parent ${latestCommitSha}`);
 
       const newCommit = await octokit.git.createCommit({
         owner,
@@ -55,6 +65,8 @@ export const GithubService = (ghToken: string): IGithubService => {
         },
       });
 
+      commands.logDebug(`...Create ref ${newCommit.data.sha} under ${branch}`);
+
       await octokit.git.createRef({
         owner,
         repo,
@@ -63,6 +75,7 @@ export const GithubService = (ghToken: string): IGithubService => {
       });
     },
     openPullRequest: async (branch, title, body) => {
+      commands.logDebug(`GithubService: Open PR '${title}' at '${branch}'`);
       const pullRequest = await octokit.pulls.create({
         owner,
         repo,
@@ -74,6 +87,7 @@ export const GithubService = (ghToken: string): IGithubService => {
       commands.logInfo(`Created Pull Request: ${pullRequest.data.html_url}`);
     },
     getFileContent: async (path, tag) => {
+      commands.logDebug(`GithubService: Get File '${path}' at '${tag}'`);
       const contentResponse = await octokit.repos.getContent({
         owner,
         repo,

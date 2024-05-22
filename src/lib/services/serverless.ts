@@ -1,6 +1,7 @@
 import { Twilio } from "twilio";
 import { FUNCTION_URL_REGEX } from "../helpers/studio-schemas";
 import { exit } from "process";
+import { commands } from "../helpers/commands";
 
 type ServiceReference = {
   name: string;
@@ -30,8 +31,10 @@ const getServiceFunctions = async (
   environmentSuffix: string | null
 ) => {
   try {
+    commands.logDebug(`Serverless: Fetch Service ${uniqueName}`);
     const service = await client.serverless.v1.services(uniqueName).fetch();
 
+    commands.logDebug(`Serverless: List Environments under ${uniqueName}`);
     const environmentList = await service.environments().list();
     const environment = environmentList.find((e) => e.domainSuffix === environmentSuffix);
 
@@ -39,6 +42,7 @@ const getServiceFunctions = async (
       throw new Error("Environment not found!");
     }
 
+    commands.logDebug(`Serverless: Fetch Latest Build for ${uniqueName}/${environmentSuffix}`);
     const build = await service.builds().get(environment.buildSid).fetch();
     const functionVersions = (build.functionVersions as FunctionVersion[]).reduce(
       (prev, curr) => ({

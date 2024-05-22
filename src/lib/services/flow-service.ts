@@ -13,9 +13,11 @@ interface IFlowService {
 
 export const FlowService = async (client: Twilio): Promise<IFlowService> => {
   try {
+    commands.logDebug("FlowService: Initiate");
     const flowList = await client.studio.v2.flows.list();
     return {
       byName: (friendlyName) => {
+        commands.logDebug(`FlowService: Get by name ${friendlyName}`);
         const flow = flowList.find((f) => f.friendlyName === friendlyName);
         if (!flow) {
           commands.setFailed(`No Studio Flow with friendlyName '${friendlyName}' was found.`);
@@ -25,6 +27,7 @@ export const FlowService = async (client: Twilio): Promise<IFlowService> => {
       },
       byNameOrNull: (friendlyName) => flowList.find((f) => f.friendlyName === friendlyName) ?? null,
       bySid: (sid) => {
+        commands.logDebug(`FlowService: Get by sid ${sid}`);
         const flow = flowList.find((f) => f.sid === sid) || null;
         if (!flow) {
           commands.setFailed(`No Studio Flow with sid '${sid}' was found.`);
@@ -34,6 +37,7 @@ export const FlowService = async (client: Twilio): Promise<IFlowService> => {
       },
       bySidOrNull: (sid) => flowList.find((f) => f.sid === sid) ?? null,
       getFlowSidMap: () => {
+        commands.logDebug("FlowService: Get Flow Sid Map");
         return flowList.reduce(
           (prev, curr) => ({
             ...prev,

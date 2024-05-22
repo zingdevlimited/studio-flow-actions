@@ -57,6 +57,7 @@ const replaceShellVariables = (configurationString: string) => {
   const envVarRegex = /\$([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
   const replacedJson = configurationString.replace(envVarRegex, (_, variable) => {
+    commands.logDebug(`Substituting shell variable $${variable}: ${process.env[variable]}`);
     return process.env[variable] || "";
   });
 

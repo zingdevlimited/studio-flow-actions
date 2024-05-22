@@ -8,6 +8,7 @@ interface ITaskrouterService {
 
 export const TaskrouterService = async (client: Twilio): Promise<ITaskrouterService> => {
   try {
+    commands.logDebug("TaskrouterService: Initialize");
     const workspaces = await client.taskrouter.v1.workspaces.list();
     const flexWorkspace = workspaces.length ? workspaces[0] : null;
 
@@ -16,6 +17,7 @@ export const TaskrouterService = async (client: Twilio): Promise<ITaskrouterServ
         if (!flexWorkspace) {
           return {};
         }
+        commands.logDebug("TaskrouterService: List TaskChannels");
         const channels = await flexWorkspace.taskChannels().list();
 
         return channels.reduce(
@@ -30,6 +32,7 @@ export const TaskrouterService = async (client: Twilio): Promise<ITaskrouterServ
         if (!flexWorkspace) {
           return {};
         }
+        commands.logDebug("TaskrouterService: List Workflows");
         const workflows = await flexWorkspace.workflows().list();
 
         return workflows.reduce(
