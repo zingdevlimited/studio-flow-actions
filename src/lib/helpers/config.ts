@@ -9,7 +9,18 @@ export const configFileSchema = z.object({
   flows: z.array(
     z.object({
       name: z.string(),
-      path: z.string(),
+      path: z.string().transform((p, ctx) => {
+        if (p.startsWith("../")) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["path"],
+            message: "Path should not point to a parent directory.",
+          });
+        } else if (p.startsWith("./")) {
+          return p.substring("./".length);
+        }
+        return p;
+      }),
       sid: z.string().optional(),
       subflow: z.boolean().default(false),
       allowCreate: z.boolean().default(false),
@@ -54,12 +65,7 @@ const replaceShellVariables = <T>(configuration: T) => {
   return JSON.parse(replacedJson) as T;
 };
 
-export const readFileLocalOrRemote = async (path: string) => {
-  let filePath = path;
-  if (filePath.startsWith("./")) {
-    filePath = filePath.substring("./".length);
-  }
-
+export const readFileLocalOrRemote = async (filePath: string) => {
   if (!existsSync(filePath)) {
     if (process.env.GITHUB_ACTIONS !== "true") {
       commands.setFailed(`File path '${filePath}' could not be found. Did you forget to checkout?`);
