@@ -88,7 +88,10 @@ export const readFileLocalOrRemote = async (filePath: string) => {
 };
 
 export const getConfiguration = async () => {
-  const configPath = commands.getInput("CONFIG_PATH");
+  let configPath = commands.getInput("CONFIG_PATH");
+  if (configPath.startsWith("./")) {
+    configPath = configPath.substring("./".length);
+  }
 
   const configFileContent = await readFileLocalOrRemote(configPath);
   const configurationParseResult = configFileSchema.safeParse(JSON.parse(configFileContent));
