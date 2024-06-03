@@ -7,6 +7,9 @@ import color from "ansi-colors";
 
 export const FUNCTION_URL_REGEX = /https:\/\/(\S+)-\d\d\d\d(-(\S+))?\.twil\.io(\/\S*)/;
 
+const SEND_TO_FLEX_WORKFLOW_NAME_REGEX = /\\"workflowName\\"\s*:\s*\\"([\w\s-]+)\\"/;
+const SEND_TO_FLEX_CHANNEL_NAME_REGEX = /\\"channelName\\"\s*:\s*\\"([\w\s-]+)\\"/;
+
 const baseWidgetSchema = z.object({
   name: z.string(),
   transitions: z.array(
@@ -39,16 +42,15 @@ const runFunctionWidgetSchema = z
   })
   .merge(baseWidgetSchema);
 
-const sendToFlexWidgetAttributesSchema = z.object({
-  workflowName: z.string({
-    required_error:
-      "send-to-flex attributes must contain 'workflowName' field for deployment purposes",
-  }),
-  channelName: z.string({
-    required_error:
-      "send-to-flex attributes must contain 'channelName' field (corresponding to a TaskChannel uniqueName) for deployment purposes",
-  }),
-});
+export const parseSendToFlexRequiredAttributes = (attributes: string) => {
+  const workflowNameMatch = SEND_TO_FLEX_WORKFLOW_NAME_REGEX.exec(attributes);
+  const channelNameMatch = SEND_TO_FLEX_CHANNEL_NAME_REGEX.exec(attributes);
+
+  const workflowName = workflowNameMatch?.[1] ?? null;
+  const channelName = channelNameMatch?.[1] ?? null;
+
+  return { workflowName, channelName };
+};
 
 const sendToFlexWidgetSchema = z
   .object({
@@ -58,16 +60,23 @@ const sendToFlexWidgetSchema = z
         waitUrl: z.string().optional(),
         workflow: z.string().startsWith("WW"),
         channel: z.string().startsWith("TC"),
-        attributes: z
-          .preprocess((str, ctx) => {
-            try {
-              return JSON.parse(str as string);
-            } catch (e) {
-              ctx.addIssue({ code: "custom", message: "Invalid JSON" });
-              return z.NEVER;
-            }
-          }, sendToFlexWidgetAttributesSchema)
-          .transform((attr) => JSON.stringify(attr)),
+        attributes: z.string().superRefine((attr, ctx) => {
+          const { workflowName, channelName } = parseSendToFlexRequiredAttributes(attr);
+          if (!workflowName) {
+            ctx.addIssue({
+              code: "custom",
+              message:
+                "send-to-flex attributes must contain 'workflowName' field for deployment purposes",
+            });
+          }
+          if (!channelName) {
+            ctx.addIssue({
+              code: "custom",
+              message:
+                "send-to-flex attributes must contain 'channelName' field (corresponding to a TaskChannel uniqueName) for deployment purposes",
+            });
+          }
+        }),
       })
       .passthrough(),
   })
@@ -130,8 +139,6 @@ export type StudioFlow = z.infer<typeof studioFlowSchema>;
 
 export type ManagedWidget = z.infer<typeof studioStateSchema>;
 
-export type SendToFlexWidgetAttributes = z.infer<typeof sendToFlexWidgetAttributesSchema>;
-
 export const getManagedWidgets = (
   flow: StudioFlow,
   configuration: ConfigFile,
@@ -171,20 +178,22 @@ export const getManagedWidgets = (
         return;
       case "send-to-flex":
         if (twilioServices) {
-          const attributes = JSON.parse(state.properties.attributes) as SendToFlexWidgetAttributes;
+          const { workflowName, channelName } = parseSendToFlexRequiredAttributes(
+            state.properties.attributes
+          );
 
-          if (!twilioServices.channelMap[attributes.channelName]) {
+          if (!twilioServices.channelMap[channelName!]) {
             ctx.addIssue({
               code: "custom",
               path: ["properties", "attributes", "channelName"],
-              message: `Unknown channelName '${attributes.channelName}'. (Must match the uniqueName of an existing TaskChannel)`,
+              message: `Unknown channelName '${channelName}'. (Must match the uniqueName of an existing TaskChannel)`,
             });
           }
-          if (!twilioServices.workflowMap[attributes.workflowName]) {
+          if (!twilioServices.workflowMap[workflowName!]) {
             ctx.addIssue({
               code: "custom",
               path: ["properties", "attributes", "workflowName"],
-              message: `Unknown workflowName '${attributes.workflowName}'. (Must match either a Friendly Name OR the key of a 'workflowMap' entry in your config file)`,
+              message: `Unknown workflowName '${workflowName}'. (Must match either a Friendly Name OR the key of a 'workflowMap' entry in your config file)`,
             });
           }
         }
