@@ -145,7 +145,7 @@ export const commands = {
     if (githubActions) {
       const headings = Object.keys(rows[0]);
       const headerRow = headings.map((h) => ({ header: true, data: h }));
-      const dataRows = rows.map((row) => headings.map((h) => row[h]));
+      const dataRows = rows.map((row) => headings.map((h) => row[h] ?? "Unknown"));
 
       core.summary.addTable([headerRow, ...dataRows]);
     } else {

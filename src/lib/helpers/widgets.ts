@@ -140,7 +140,7 @@ export const updateRunSubflowWidgets = (
       widget: state.name,
       type,
       field: "flow_sid",
-      value: subflowSid,
+      value: subflowSid ?? "<Known after deploy>",
     });
   }
 
