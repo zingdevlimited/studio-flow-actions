@@ -36,7 +36,7 @@ const getCorrectWidget = () => ({
     channel: "TC000",
     attributes:
       // eslint-disable-next-line quotes
-      `{\\"workflowName\\":\\"Test Workflow\\",\\"channelName\\":\\"testchannel\\",\\"otherProperty\\":{{ something_else | to_json }}}`,
+      `{"workflowName":"Test Workflow","channelName":"testchannel","otherProperty":{{ something_else | to_json }}}`,
   },
 });
 
@@ -63,7 +63,7 @@ describe("getManagedWidgets (send-to-flex)", () => {
     expect(
       flexWidget.properties.attributes.includes(
         // eslint-disable-next-line quotes
-        `\\"otherProperty\\":{{ something_else | to_json }}}`
+        `"otherProperty":{{ something_else | to_json }}}`
       )
     ).toBe(true);
   });

@@ -7,8 +7,8 @@ import color from "ansi-colors";
 
 export const FUNCTION_URL_REGEX = /https:\/\/(\S+)-\d\d\d\d(-(\S+))?\.twil\.io(\/\S*)/;
 
-const SEND_TO_FLEX_WORKFLOW_NAME_REGEX = /\\"workflowName\\"\s*:\s*\\"([\w\s-]+)\\"/;
-const SEND_TO_FLEX_CHANNEL_NAME_REGEX = /\\"channelName\\"\s*:\s*\\"([\w\s-]+)\\"/;
+const SEND_TO_FLEX_WORKFLOW_NAME_REGEX = /"workflowName"\s*:\s*"([\w\s-]+)"/;
+const SEND_TO_FLEX_CHANNEL_NAME_REGEX = /"channelName"\s*:\s*"([\w\s-]+)"/;
 
 const baseWidgetSchema = z.object({
   name: z.string(),
