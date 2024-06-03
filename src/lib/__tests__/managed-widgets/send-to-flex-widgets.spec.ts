@@ -34,10 +34,9 @@ const getCorrectWidget = () => ({
   properties: {
     workflow: "WW000",
     channel: "TC000",
-    attributes: JSON.stringify({
-      workflowName: "Test Workflow",
-      channelName: "testchannel",
-    }),
+    attributes:
+      // eslint-disable-next-line quotes
+      `{\\"workflowName\\":\\"Test Workflow\\",\\"channelName\\":\\"testchannel\\",\\"otherProperty\\":{{ something_else | to_json }}}`,
   },
 });
 
@@ -59,6 +58,14 @@ describe("getManagedWidgets (send-to-flex)", () => {
 
     const res = getManagedWidgets(flow, configuration, mockServices);
     expect(res[0]).not.toBeNull();
+
+    const flexWidget = res[0] as ManagedWidget & { type: "send-to-flex" };
+    expect(
+      flexWidget.properties.attributes.includes(
+        // eslint-disable-next-line quotes
+        `\\"otherProperty\\":{{ something_else | to_json }}}`
+      )
+    ).toBe(true);
   });
 
   it("Fails with missing workflowName attribute", () => {

@@ -1,5 +1,5 @@
 import { FunctionsMap, getUrlComponents } from "../services/serverless";
-import { ManagedWidget, SendToFlexWidgetAttributes, StudioFlow } from "./studio-schemas";
+import { ManagedWidget, StudioFlow, parseSendToFlexRequiredAttributes } from "./studio-schemas";
 
 type UpdateWidgetResult = {
   changes: Array<{ widget: string; type: string; field: string; value: string }>;
@@ -67,9 +67,11 @@ export const updateSendToFlexWidgets = (
   for (const state of states) {
     if (state.type !== type) continue;
 
-    const attributes = JSON.parse(state.properties.attributes) as SendToFlexWidgetAttributes;
+    const { workflowName, channelName } = parseSendToFlexRequiredAttributes(
+      state.properties.attributes
+    );
 
-    const channelSid = channelsMap[attributes.channelName];
+    const channelSid = channelsMap[channelName!];
     state.properties.channel = channelSid;
     changes.push({
       widget: state.name,
@@ -78,7 +80,7 @@ export const updateSendToFlexWidgets = (
       value: channelSid,
     });
 
-    const workflowSid = workflowsMap[attributes.workflowName];
+    const workflowSid = workflowsMap[workflowName!];
     state.properties.workflow = workflowSid;
     changes.push({
       widget: state.name,
