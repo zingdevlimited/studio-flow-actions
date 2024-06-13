@@ -11,6 +11,14 @@ inputs:
   TWILIO_API_SECRET:
     required: true
     description: The Twilio Api Secret
+  ADD_MISSING_DEPLOY_PROPERTIES:
+    required: false
+    description: |
+      Set to **true** to add missing properties required by deployment, by inferring them from sids. Applies to:
+
+      - `send-to-flex` > `attributes` > `workflowName`
+      - `send-to-flex` > `attributes` > `channelName`
+      - `run-subflow` > `parameters` > `subflowName`
   DISABLE_CHECK:
     required: false
     description: Set to **true** to disable the Check action from being ran as part of Sync

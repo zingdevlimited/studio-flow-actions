@@ -49,6 +49,7 @@ jobs:
         uses: zingdevlimited/studio-flow-actions/sync@v1
         with:
           CONFIG_PATH: studioconfig.json
+          ADD_MISSING_DEPLOY_PROPERTIES: true
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
           TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
 ```

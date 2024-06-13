@@ -52,6 +52,18 @@ export const parseSendToFlexRequiredAttributes = (attributes: string) => {
   return { workflowName, channelName };
 };
 
+export const addPropertyToFlexAttributesString = (
+  attributes: string,
+  propertyKey: string,
+  propertyValue: string
+) => {
+  if (attributes.replaceAll(" ", "") === "{}") {
+    return `{"${propertyKey}":"${propertyValue}"}`;
+  } else {
+    return "{" + `"${propertyKey}":"${propertyValue}",` + attributes.substring(1);
+  }
+};
+
 const sendToFlexWidgetSchema = z
   .object({
     type: z.literal("send-to-flex"),
