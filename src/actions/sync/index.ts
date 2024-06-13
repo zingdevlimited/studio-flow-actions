@@ -126,7 +126,7 @@ const run = async () => {
               }
 
               widgetProperties.parameters.push({ key: "subflowName", value: subflowName });
-              adjustments.push(`- **${state.name}.properties.subflowName** <- \`${subflowName}\``);
+              adjustments.push(`- **${state.name}.parameters.subflowName** <- \`${subflowName}\``);
             }
           }
         }
@@ -185,7 +185,7 @@ const run = async () => {
           flowString = `${flowString}\n\t- **Revision**: ${f.revision}`;
 
           if (f.adjustments.length) {
-            flowString = `${flowString}\nt- **Adjustments**:\n\t\t${f.adjustments.join("\n\t\t")}`;
+            flowString = `${flowString}\n\t- **Adjustments**:\n\t\t${f.adjustments.join("\n\t\t")}`;
           }
           return flowString;
         })
