@@ -55,6 +55,7 @@ const getCorrectWidget = () => ({
     parameters: [
       {
         key: "subflowName",
+        type: "string",
         value: "existingSubflow",
       },
     ],

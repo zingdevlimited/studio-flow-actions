@@ -125,7 +125,11 @@ const run = async () => {
                 subflowName = subflowInstance.friendlyName;
               }
 
-              widgetProperties.parameters.push({ key: "subflowName", value: subflowName });
+              widgetProperties.parameters.push({
+                key: "subflowName",
+                value: subflowName,
+                type: "string",
+              });
               adjustments.push(`- **${state.name}.parameters.subflowName** <- \`${subflowName}\``);
             }
           }
