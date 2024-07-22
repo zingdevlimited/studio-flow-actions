@@ -104,7 +104,9 @@ const setVariablesWidgetSchema = z
     properties: z
       .object({
         variables: z.array(
-          z.object({ key: z.string(), value: z.string(), type: z.string() }).passthrough()
+          z
+            .object({ key: z.string(), value: z.string(), type: z.string().default("string") })
+            .passthrough()
         ),
       })
       .passthrough(),
@@ -117,7 +119,11 @@ const runSubflowWidgetSchema = z
     properties: z
       .object({
         parameters: z
-          .array(z.object({ key: z.string(), value: z.string(), type: z.string() }).passthrough())
+          .array(
+            z
+              .object({ key: z.string(), value: z.string(), type: z.string().default("string") })
+              .passthrough()
+          )
           .default([])
           .refine((params) => params.some((p) => p.key === "subflowName"), {
             message:
