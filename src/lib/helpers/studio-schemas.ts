@@ -10,15 +10,17 @@ export const FUNCTION_URL_REGEX = /https:\/\/(\S+)-\d\d\d\d(-(\S+))?\.twil\.io(\
 const SEND_TO_FLEX_WORKFLOW_NAME_REGEX = /"workflowName"\s*:\s*"([\w\s-]+)"/;
 const SEND_TO_FLEX_CHANNEL_NAME_REGEX = /"channelName"\s*:\s*"([\w\s-]+)"/;
 
-const baseWidgetSchema = z.object({
-  name: z.string(),
-  transitions: z.array(
-    z.object({
-      event: z.string(),
-      next: z.string().optional(),
-    })
-  ),
-});
+const baseWidgetSchema = z
+  .object({
+    name: z.string(),
+    transitions: z.array(
+      z.object({
+        event: z.string(),
+        next: z.string().optional(),
+      })
+    ),
+  })
+  .passthrough();
 
 const runFunctionWidgetSchema = z
   .object({
@@ -30,10 +32,12 @@ const runFunctionWidgetSchema = z
         function_sid: z.string().startsWith("ZH").or(z.string().startsWith("ZN")),
         parameters: z
           .array(
-            z.object({
-              key: z.string(),
-              value: z.string(),
-            })
+            z
+              .object({
+                key: z.string(),
+                value: z.string(),
+              })
+              .passthrough()
           )
           .optional(),
         url: z.string(),
@@ -99,7 +103,9 @@ const setVariablesWidgetSchema = z
     type: z.literal("set-variables"),
     properties: z
       .object({
-        variables: z.array(z.object({ key: z.string(), value: z.string() })),
+        variables: z.array(
+          z.object({ key: z.string(), value: z.string(), type: z.string() }).passthrough()
+        ),
       })
       .passthrough(),
   })
@@ -111,7 +117,7 @@ const runSubflowWidgetSchema = z
     properties: z
       .object({
         parameters: z
-          .array(z.object({ key: z.string(), value: z.string() }))
+          .array(z.object({ key: z.string(), value: z.string(), type: z.string() }).passthrough())
           .default([])
           .refine((params) => params.some((p) => p.key === "subflowName"), {
             message:
@@ -138,14 +144,18 @@ export const MANAGED_WIDGET_TYPES = [
   "run-subflow",
 ] as const;
 
-export const studioFlowSchema = z.object({
-  description: z.string(),
-  states: z.array(z.object({ name: z.string(), type: z.string() }).passthrough()),
-  initial_state: z.literal("Trigger"),
-  flags: z.object({
-    allow_concurrent_calls: z.literal(true),
-  }),
-});
+export const studioFlowSchema = z
+  .object({
+    description: z.string(),
+    states: z.array(z.object({ name: z.string(), type: z.string() }).passthrough()),
+    initial_state: z.literal("Trigger"),
+    flags: z
+      .object({
+        allow_concurrent_calls: z.literal(true),
+      })
+      .passthrough(),
+  })
+  .passthrough();
 
 export type StudioFlow = z.infer<typeof studioFlowSchema>;
 
