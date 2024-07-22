@@ -14,10 +14,10 @@
     "run:validate": "node validate/index.js",
     "run:deploy": "node deploy/index.js",
     "test": "jest",
-    "package:sync": "ncc -m build src/actions/sync/index.ts -o sync",
-    "package:check": "ncc -m build src/actions/check/index.ts -o check",
-    "package:validate": "ncc -m build src/actions/validate/index.ts -o validate",
-    "package:deploy": "ncc -m build src/actions/deploy/index.ts -o deploy",
+    "package:sync": "esbuild src/actions/sync/index.ts --bundle --platform=node --minify --outfile=sync/index.js",
+    "package:check": "esbuild src/actions/check/index.ts --bundle --platform=node --minify --outfile=check/index.js",
+    "package:validate": "esbuild src/actions/validate/index.ts --bundle --platform=node --minify --outfile=validate/index.js",
+    "package:deploy": "esbuild src/actions/deploy/index.ts --bundle --platform=node --minify --outfile=deploy/index.js",
     "package:all": "yarn package:sync && yarn package:check && yarn package:validate && yarn package:deploy"
   },
   "jest": {
@@ -59,7 +59,7 @@
     "@types/node": "^20.8.7",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
-    "@vercel/ncc": "^0.38.1",
+    "esbuild": "^0.23.0",
     "eslint": "^8.29.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",
