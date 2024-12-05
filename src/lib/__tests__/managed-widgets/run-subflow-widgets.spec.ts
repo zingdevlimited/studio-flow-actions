@@ -1,6 +1,7 @@
 import { ManagedWidget, StudioFlow, getManagedWidgets } from "../../helpers/studio-schemas";
 import { ConfigFile } from "../../helpers/config";
 import { TwilioServices } from "../../prepare-services";
+import { FunctionMap } from "../../services/serverless";
 
 jest.mock("../../helpers/commands");
 
@@ -66,7 +67,7 @@ const mockServices: TwilioServices = {
   studioFlowMap: {
     existingSubflow: "FW123",
   },
-  functionMap: {},
+  functionMap: new FunctionMap([]),
   channelMap: {},
   workflowMap: {},
   twilioClient: {} as any,

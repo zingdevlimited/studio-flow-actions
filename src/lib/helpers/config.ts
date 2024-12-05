@@ -31,10 +31,11 @@ export const configFileSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        environmentSuffix: z.union([z.string(), z.null()]),
+        environmentSuffix: z.union([z.string(), z.null(), z.literal(0)]),
+        pattern: z.boolean().optional(),
       })
     )
-    .optional(),
+    .default([]),
   workflowMap: z.record(z.string()).optional(),
   subflowMap: z.record(z.string()).optional(),
   variableReplacements: z.record(z.string()).optional(),

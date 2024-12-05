@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { commands } from "./commands";
 import { ConfigFile } from "./config";
-import { getUrlComponents } from "../services/serverless";
+import { patternMatchServiceName, getUrlComponents } from "../services/serverless";
 import { TwilioServices } from "../prepare-services";
 import color from "ansi-colors";
 
@@ -174,7 +174,7 @@ export const getManagedWidgets = (
 ) => {
   const refinedStateSchema = studioStateSchema.superRefine((state, ctx) => {
     switch (state.type) {
-      case "run-function":
+      case "run-function": {
         const urlComponents = getUrlComponents(state.properties.url);
         if (!urlComponents) {
           ctx.addIssue({
@@ -184,7 +184,11 @@ export const getManagedWidgets = (
           });
           return;
         }
-        if (!configuration.functionServices?.some((s) => s.name === urlComponents.serviceName)) {
+
+        const matchingFunctionService = configuration.functionServices.some((service) =>
+          patternMatchServiceName(service, urlComponents.serviceName)
+        );
+        if (!matchingFunctionService) {
           ctx.addIssue({
             code: "custom",
             path: ["properties", "url"],
@@ -193,7 +197,7 @@ export const getManagedWidgets = (
           return;
         }
         if (twilioServices) {
-          const serviceObject = twilioServices.functionMap[urlComponents.serviceName];
+          const serviceObject = twilioServices.functionMap.getService(urlComponents.serviceName);
           if (!serviceObject?.functions[urlComponents.functionPath]) {
             ctx.addIssue({
               code: "custom",
@@ -204,6 +208,7 @@ export const getManagedWidgets = (
           }
         }
         return;
+      }
       case "send-to-flex":
         if (twilioServices) {
           const { workflowName, channelName } = parseSendToFlexRequiredAttributes(

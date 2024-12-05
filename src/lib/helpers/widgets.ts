@@ -1,4 +1,4 @@
-import { FunctionsMap, getUrlComponents } from "../services/serverless";
+import { FunctionMap, getUrlComponents } from "../services/serverless";
 import { ManagedWidget, StudioFlow, parseSendToFlexRequiredAttributes } from "./studio-schemas";
 
 type UpdateWidgetResult = {
@@ -7,7 +7,7 @@ type UpdateWidgetResult = {
 
 export const updateRunFunctionWidgets = (
   states: ManagedWidget[],
-  functionsMap: FunctionsMap
+  functionMap: FunctionMap
 ): UpdateWidgetResult => {
   const type = "run-function";
   const changes = [];
@@ -16,7 +16,7 @@ export const updateRunFunctionWidgets = (
 
     const urlComponents = getUrlComponents(state.properties.url)!;
 
-    const serviceObject = functionsMap[urlComponents.serviceName];
+    const serviceObject = functionMap.getService(urlComponents.serviceName)!;
 
     state.properties.service_sid = serviceObject.serviceSid;
     changes.push({

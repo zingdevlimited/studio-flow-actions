@@ -1,6 +1,7 @@
 import { ManagedWidget, StudioFlow, getManagedWidgets } from "../../helpers/studio-schemas";
 import { ConfigFile } from "../../helpers/config";
 import { TwilioServices } from "../../prepare-services";
+import { FunctionMap } from "../../services/serverless";
 
 jest.mock("../../helpers/commands");
 
@@ -22,6 +23,7 @@ const configuration: ConfigFile = {
       allowCreate: false,
     },
   ],
+  functionServices: [],
   replaceWidgetTypes: ["send-to-flex"],
   customPropertyReplacements: [],
   enableShellVariables: false,
@@ -47,7 +49,7 @@ const mockServices: TwilioServices = {
   workflowMap: {
     "Test Workflow": "WW123",
   },
-  functionMap: {},
+  functionMap: new FunctionMap([]),
   studioFlowMap: {},
   twilioClient: {} as any,
 };
