@@ -70,6 +70,9 @@
               },
               {
                 "type": "null"
+              },
+              {
+                "const": 0
               }
             ],
             "description": "The URL environment suffix. Set to null for production"
