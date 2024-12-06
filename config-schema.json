@@ -70,9 +70,16 @@
               },
               {
                 "type": "null"
+              },
+              {
+                "const": 0
               }
             ],
             "description": "The URL environment suffix. Set to null for production"
+          },
+          "pattern": {
+            "type": "boolean",
+            "description": "(Optional) Set to true to treat the name field as a Regex pattern. Useful for Service Names that are not deterministic (e.g. Library Function Services)"
           }
         },
         "required": [

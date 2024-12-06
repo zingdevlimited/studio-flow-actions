@@ -58,7 +58,7 @@ export const performReplacements = async (
 
     for (const widget of managedWidgets) {
       const stateIndex = studioFlowDefinition.states.findIndex((s) => s.name === widget.name);
-      studioFlowDefinition.states[stateIndex!] = widget;
+      studioFlowDefinition.states[stateIndex] = widget;
     }
 
     for (const customReplacement of configuration.customPropertyReplacements.filter(

@@ -75,6 +75,35 @@ The base URL in your Flow JSON is used to match the widget to the correct Functi
 
 If the Twilio account you are deploying to has the Functions Service `my-custom-api-1111`, and your Flow JSON points to `https://my-custom-api-2222-dev.twil.io/func`, then the example above will update the URL to `https://my-custom-api-1111.twil.io/func`.
 
+#### Run Function: Dynamic Service Name
+
+In some situations the unique names of the Functions Services are not static across environments.
+In the case of Twilio Library Plugins, the services also contain a version number.
+This causes issues if there's a mismatch between the version number Studio is referencing and the version number actually deployed.
+
+You can use Regex patterns to solve this issue:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
+  "flows": [(...)],
+  "replaceWidgetTypes": [
+    "run-function"
+  ],
+  "functionServices": [
+    {
+      "name": "plibo-contact-center-schedule-manager-\\d-\\d-\\d",
+      "environmentSuffix": 0
+    }
+  ]
+}
+```
+
+Setting Environment Suffix to `0` will select the **first** available Environment from the remote service.
+
+This will match references like `plibo-contact-center-schedule-manager-1-0-0` and
+`plibo-contact-center-schedule-manager-1-1-0` with each other.
+
 ### Run Subflow
 
 Update Run Subflow widgets with the correct Flow sid.

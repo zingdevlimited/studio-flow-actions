@@ -1,6 +1,7 @@
 import { ManagedWidget, StudioFlow, getManagedWidgets } from "../../helpers/studio-schemas";
 import { ConfigFile } from "../../helpers/config";
 import { TwilioServices } from "../../prepare-services";
+import { FunctionMap } from "../../services/serverless";
 
 jest.mock("../../helpers/commands");
 
@@ -27,6 +28,11 @@ const configuration: ConfigFile = {
       name: "testservice",
       environmentSuffix: "dev",
     },
+    {
+      name: "patternservice-\\d-\\d-\\d",
+      environmentSuffix: 0,
+      pattern: true,
+    },
   ],
   replaceWidgetTypes: ["run-function"],
   customPropertyReplacements: [],
@@ -46,16 +52,28 @@ const getCorrectWidget = () => ({
 });
 
 const mockServices: TwilioServices = {
-  functionMap: {
-    testservice: {
+  functionMap: new FunctionMap([
+    {
+      uniqueName: "testservice",
       serviceSid: "ZS123",
       environmentSid: "ZE123",
       domainName: "testservice-1234-dev.twil.io",
       functions: {
         "/testfunction": "ZN123",
       },
+      serviceConfig: configuration.functionServices[0],
     },
-  },
+    {
+      uniqueName: "patternservice-1-2-1",
+      serviceSid: "ZS123",
+      environmentSid: "ZE123",
+      domainName: "testservice-1234-dev.twil.io",
+      functions: {
+        "/testfunction2": "ZN123",
+      },
+      serviceConfig: configuration.functionServices[1],
+    },
+  ]),
   twilioClient: {} as any,
   channelMap: {},
   studioFlowMap: {},
@@ -88,6 +106,16 @@ describe("getManagedWidgets (run-function)", () => {
     const res = getManagedWidgets(flow, configuration, mockServices);
 
     expect(res[0]).toBeNull();
+  });
+
+  it("Succeeds with URL pointing to service name matching pattern defined in configuration", async () => {
+    const widget = getCorrectWidget();
+    widget.properties.url = "https://patternservice-1-0-0-1234-dev.twil.io/testfunction2";
+    const flow = mockFlowWithWidget(widget);
+
+    const res = getManagedWidgets(flow, configuration, mockServices);
+
+    expect(res[0]).not.toBeNull();
   });
 
   it("Fails with URL pointing to non-existing function", async () => {

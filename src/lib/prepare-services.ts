@@ -2,13 +2,13 @@ import { Twilio } from "twilio";
 import { ConfigFile } from "./helpers/config";
 import { FlowService } from "./services/flow-service";
 import { TaskrouterService } from "./services/taskrouter-service";
-import { FunctionsMap, getFunctionServices } from "./services/serverless";
+import { FunctionMap, getFunctionServices } from "./services/serverless";
 
 export const prepareServices = async (configuration: ConfigFile, twilioClient: Twilio) => {
   const taskrouterService = await TaskrouterService(twilioClient);
   const flowService = await FlowService(twilioClient);
 
-  let functionMap: FunctionsMap = {};
+  let functionMap = new FunctionMap([]);
   let workflowMap = await taskrouterService.getWorkflowSidMap();
   const channelMap = await taskrouterService.getChannelSidMap();
   let studioFlowMap = flowService.getFlowSidMap();
@@ -26,7 +26,7 @@ export const prepareServices = async (configuration: ConfigFile, twilioClient: T
     };
   }
 
-  if (configuration.functionServices) {
+  if (configuration.functionServices.length) {
     functionMap = await getFunctionServices(twilioClient, configuration.functionServices);
   }
 
