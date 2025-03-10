@@ -2,7 +2,7 @@ import { Twilio } from "twilio";
 import { commands } from "../helpers/commands";
 import { FlowInstance } from "twilio/lib/rest/studio/v2/flow";
 
-interface IFlowService {
+export interface IFlowService {
   byName: (friendlyName: string) => FlowInstance;
   byNameOrNull: (friendlyName: string) => FlowInstance | null;
   bySid: (sid: string) => FlowInstance;

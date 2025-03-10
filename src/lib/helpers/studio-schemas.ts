@@ -150,10 +150,34 @@ export const MANAGED_WIDGET_TYPES = [
   "run-subflow",
 ] as const;
 
+export const studioFlowTransitionSchema = z.object({
+  event: z.string(),
+  next: z.string().optional(),
+  conditions: z
+    .array(
+      z.object({
+        friendly_name: z.string(),
+        arguments: z.array(z.string()),
+        type: z.string(),
+        value: z.string(),
+      })
+    )
+    .optional(),
+});
+
 export const studioFlowSchema = z
   .object({
     description: z.string(),
-    states: z.array(z.object({ name: z.string(), type: z.string() }).passthrough()),
+    states: z.array(
+      z
+        .object({
+          name: z.string(),
+          type: z.string(),
+          transitions: z.array(studioFlowTransitionSchema).default([]),
+          properties: z.record(z.unknown()),
+        })
+        .passthrough()
+    ),
     initial_state: z.literal("Trigger"),
     flags: z
       .object({
