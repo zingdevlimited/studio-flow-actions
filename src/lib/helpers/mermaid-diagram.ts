@@ -158,7 +158,7 @@ class MermaidBuilder {
     return {
       content: lines.join("\n"),
       edgeCount: this.edges.length,
-      vertextCount: definedVertices.length,
+      vertexCount: definedVertices.length,
     };
   }
 

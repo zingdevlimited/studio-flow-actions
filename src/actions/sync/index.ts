@@ -233,35 +233,34 @@ const run = async () => {
         `auto: Sync studio flow definitions (${GITHUB_RUN_NUMBER})`
       );
 
-      let body = flowWrites
-        .map((f) => {
-          let flowString = `- \`${f.path}\``;
-          flowString = `${flowString}\n\t- **Friendly Name**: ${f.friendlyName}`;
-          flowString = `${flowString}\n\t- **Sid**: ${f.sid}`;
-          flowString = `${flowString}\n\t- **Revision**: ${f.revision}`;
+      let prBody = "";
+      for (const f of flowWrites) {
+        let flowString = `- \`${f.path}\``;
+        flowString = `${flowString}\n\t- **Friendly Name**: ${f.friendlyName}`;
+        flowString = `${flowString}\n\t- **Sid**: ${f.sid}`;
+        flowString = `${flowString}\n\t- **Revision**: ${f.revision}`;
 
-          if (f.adjustments.length) {
-            flowString = `${flowString}\n\t- **Adjustments**:\n\t\t${f.adjustments.join("\n\t\t")}`;
-          }
+        if (f.adjustments.length) {
+          flowString = `${flowString}\n\t- **Adjustments**:\n\t\t${f.adjustments.join("\n\t\t")}`;
+        }
 
-          const mermaid = generateMermaidDiffDiagram(f.old ?? f.new, f.new);
-          if (mermaid) {
-            if (mermaid.edgeCount > 500) {
-              flowString = `${flowString}\n*Could not render change preview. Too many edges*`;
-            } else if (mermaid.content.length + flowString.length > 60000) {
-              flowString = `${flowString}\n*Could not render change preview. Exceeds PR character limit*`;
-            } else {
-              flowString = `${flowString}\n\`\`\`mermaid\n${mermaid.content}\n\`\`\``;
-            }
+        const mermaid = generateMermaidDiffDiagram(f.old ?? f.new, f.new);
+        if (mermaid) {
+          if (mermaid.edgeCount > 500) {
+            flowString = `${flowString}\n*Could not render change preview. Too many edges*`;
+          } else if (mermaid.content.length + flowString.length + prBody.length > 60000) {
+            flowString = `${flowString}\n*Could not render change preview. Exceeds PR character limit*`;
+          } else {
+            flowString = `${flowString}\n\`\`\`mermaid\n${mermaid.content}\n\`\`\``;
           }
-          return flowString;
-        })
-        .join("\n");
+        }
+        prBody = `${prBody}\n${flowString}`;
+      }
 
       await githubService.openPullRequest(
         branch,
         `Sync Flow Files (Run ${GITHUB_RUN_NUMBER})`,
-        body
+        prBody
       );
     }
   } catch (err) {
