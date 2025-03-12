@@ -31,7 +31,8 @@ This action will:
 
 1. Download the latest Flow Definition of every Studio Flow referenced in the **Studio Configuration**
 2. Commit the updated definitions to the configured JSON file paths
-3. Opens a Pull Request with these changes
+3. If **SAVE_DIAGRAMS_TO_PATH** is set, SVG files of Studio Flow diagrams (rendered by MermaidJS) will be saved to the specified directory
+4. Opens a Pull Request with these changes. The PR body will render a preview of the changes if possible
 
 This is used to avoid common merge and overwrite issues when developers work with Studio Flow simultaneously.
 It also discourages updating the Flow Definitions outside of the Studio editor.
@@ -50,6 +51,7 @@ jobs:
         with:
           CONFIG_PATH: studioconfig.json
           ADD_MISSING_DEPLOY_PROPERTIES: true
+          SAVE_DIAGRAMS_TO_PATH: docs/flow-diagrams
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
           TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
 ```
