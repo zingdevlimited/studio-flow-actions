@@ -139,12 +139,12 @@ class MermaidBuilder {
 
     const definedVertices: string[] = [];
     for (const edge of this.edges) {
-      let from = `${idLookup[edge.from]}`;
+      let from = idLookup[edge.from];
       if (!definedVertices.includes(edge.from)) {
         from = `${idLookup[edge.from]}${this.getVertexDisplay(edge.from)}`;
         definedVertices.push(edge.from);
       }
-      let to = `${idLookup[edge.to]}`;
+      let to = idLookup[edge.to];
       if (!definedVertices.includes(edge.to)) {
         to = `${idLookup[edge.to]}${this.getVertexDisplay(edge.to)}`;
         definedVertices.push(edge.to);
