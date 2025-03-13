@@ -107,7 +107,7 @@ ${e.error.message}`),{})};var J6=require("path");var nJe=async s=>{try{te.logDeb
 \`\`\`mermaid
 ${v.content}
 \`\`\``),l=`${l}
-${g}`}await o.openPullRequest(a,`Sync Flow Files (Run ${r})`,body)}}catch(s){te.setFailed(s.message)}};IGt();
+${g}`}await o.openPullRequest(a,`Sync Flow Files (Run ${r})`,l)}}catch(s){te.setFailed(s.message)}};IGt();
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:
