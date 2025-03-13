@@ -87,6 +87,14 @@ export const readFileLocalOrRemote = async (filePath: string) => {
   }
 };
 
+export const tryReadFileLocalOrRemote = async (filePath: string) => {
+  try {
+    return await readFileLocalOrRemote(filePath);
+  } catch (err) {
+    return null;
+  }
+};
+
 export const getConfiguration = async () => {
   let configPath = commands.getInput("CONFIG_PATH");
   if (configPath.startsWith("./")) {

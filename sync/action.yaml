@@ -19,6 +19,9 @@ inputs:
       - `send-to-flex` > `attributes` > `workflowName`
       - `send-to-flex` > `attributes` > `channelName`
       - `run-subflow` > `parameters` > `subflowName`
+  SAVE_DIAGRAMS_TO_PATH:
+    required: false
+    description: Directory to save Mermaid diagrams (as SVG files)
   DISABLE_CHECK:
     required: false
     description: Set to **true** to disable the Check action from being ran as part of Sync
