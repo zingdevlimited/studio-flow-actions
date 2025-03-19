@@ -14,7 +14,7 @@ jobs:
       TWILIO_API_KEY: ${{ vars.DEVELOP_TWILIO_API_KEY }}
       TWILIO_API_SECRET: ${{ secrets.DEVELOP_TWILIO_API_SECRET }}
     steps:
-      - uses: zingdevlimited/studio-flow-actions/sync@v1
+      - uses: zingdevlimited/studio-flow-actions/sync@refactor/Normalise-state-array-order
         with:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
