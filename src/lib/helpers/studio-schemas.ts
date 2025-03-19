@@ -77,6 +77,13 @@ const sendToFlexWidgetSchema = z
         workflow: z.string().startsWith("WW"),
         channel: z.string().startsWith("TC"),
         attributes: z.string().superRefine((attr, ctx) => {
+          if (!attr) {
+            ctx.addIssue({
+              code: "custom",
+              message: "attributes cannot be null or undefined",
+            });
+            return;
+          }
           const { workflowName, channelName } = parseSendToFlexRequiredAttributes(attr);
           if (!workflowName) {
             ctx.addIssue({
