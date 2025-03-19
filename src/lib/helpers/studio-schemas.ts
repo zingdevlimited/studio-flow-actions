@@ -77,13 +77,6 @@ const sendToFlexWidgetSchema = z
         workflow: z.string().startsWith("WW"),
         channel: z.string().startsWith("TC"),
         attributes: z.string().superRefine((attr, ctx) => {
-          if (!attr) {
-            ctx.addIssue({
-              code: "custom",
-              message: "attributes cannot be null or undefined",
-            });
-            return;
-          }
           const { workflowName, channelName } = parseSendToFlexRequiredAttributes(attr);
           if (!workflowName) {
             ctx.addIssue({
@@ -241,6 +234,14 @@ export const getManagedWidgets = (
         return;
       }
       case "send-to-flex":
+        if (!state.properties.attributes) {
+          ctx.addIssue({
+              code: "custom",
+              path: ["properties", "attributes"],
+              message: "attributes cannot be null or undefined.",
+          });
+          return;
+      }
         if (twilioServices) {
           const { workflowName, channelName } = parseSendToFlexRequiredAttributes(
             state.properties.attributes
