@@ -155,8 +155,12 @@ const run = async () => {
       const flowSid = flowInstance.sid;
       const revision = flowInstance.revision;
       const definition = await flowService.getDefinition(flowSid);
-
       const studioFlowDefinition = studioFlowSchema.parse(definition);
+
+      studioFlowDefinition.states = [
+        ...studioFlowDefinition.states.filter(state => state.name === "Trigger"),
+        ...studioFlowDefinition.states.filter(state => state.name !== "Trigger").sort((a, b) => a.name.localeCompare(b.name))
+      ];
 
       let adjustments: string[] = [];
       if (commands.getOptionalInput("ADD_MISSING_DEPLOY_PROPERTIES") === "true") {
