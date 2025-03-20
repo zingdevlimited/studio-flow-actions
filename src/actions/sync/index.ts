@@ -157,13 +157,6 @@ const run = async () => {
       const definition = await flowService.getDefinition(flowSid);
       const studioFlowDefinition = studioFlowSchema.parse(definition);
 
-      studioFlowDefinition.states = [
-        ...studioFlowDefinition.states.filter((state) => state.name === "Trigger"),
-        ...studioFlowDefinition.states
-          .filter((state) => state.name !== "Trigger")
-          .sort((a, b) => a.name.localeCompare(b.name)),
-      ];
-
       let adjustments: string[] = [];
       if (commands.getOptionalInput("ADD_MISSING_DEPLOY_PROPERTIES") === "true") {
         const autoAddResult = await autoAddMissingWidgetProperties(
@@ -175,6 +168,14 @@ const run = async () => {
         );
         adjustments = autoAddResult.adjustments;
       }
+
+      // Sort states by name
+      studioFlowDefinition.states = [
+        ...studioFlowDefinition.states.filter((state) => state.type === "trigger"),
+        ...studioFlowDefinition.states
+          .filter((state) => state.type !== "trigger")
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      ];
 
       const fileContent = JSON.stringify(studioFlowDefinition, undefined, 2);
 
