@@ -39,7 +39,7 @@ const autoAddMissingWidgetProperties = async (
   for (const state of studioFlowDefinition.states) {
     if (state.type === "send-to-flex") {
       const widgetProperties = (state as ManagedWidget & { type: "send-to-flex" }).properties;
-      let attributesString = widgetProperties.attributes;
+      let attributesString = widgetProperties.attributes ?? "{}";
       const existing = parseSendToFlexRequiredAttributes(attributesString);
 
       if (!existing.workflowName) {
@@ -155,7 +155,6 @@ const run = async () => {
       const flowSid = flowInstance.sid;
       const revision = flowInstance.revision;
       const definition = await flowService.getDefinition(flowSid);
-
       const studioFlowDefinition = studioFlowSchema.parse(definition);
 
       let adjustments: string[] = [];
@@ -169,6 +168,14 @@ const run = async () => {
         );
         adjustments = autoAddResult.adjustments;
       }
+
+      // Sort states by name
+      studioFlowDefinition.states = [
+        ...studioFlowDefinition.states.filter((state) => state.type === "trigger"),
+        ...studioFlowDefinition.states
+          .filter((state) => state.type !== "trigger")
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      ];
 
       const fileContent = JSON.stringify(studioFlowDefinition, undefined, 2);
 

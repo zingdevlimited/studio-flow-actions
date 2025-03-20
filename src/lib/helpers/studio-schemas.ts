@@ -76,23 +76,26 @@ const sendToFlexWidgetSchema = z
         waitUrl: z.string().optional(),
         workflow: z.string().startsWith("WW"),
         channel: z.string().startsWith("TC"),
-        attributes: z.string().superRefine((attr, ctx) => {
-          const { workflowName, channelName } = parseSendToFlexRequiredAttributes(attr);
-          if (!workflowName) {
-            ctx.addIssue({
-              code: "custom",
-              message:
-                "send-to-flex attributes must contain 'workflowName' field for deployment purposes",
-            });
-          }
-          if (!channelName) {
-            ctx.addIssue({
-              code: "custom",
-              message:
-                "send-to-flex attributes must contain 'channelName' field (corresponding to a TaskChannel uniqueName) for deployment purposes",
-            });
-          }
-        }),
+        attributes: z
+          .string()
+          .default("{}")
+          .superRefine((attr, ctx) => {
+            const { workflowName, channelName } = parseSendToFlexRequiredAttributes(attr);
+            if (!workflowName) {
+              ctx.addIssue({
+                code: "custom",
+                message:
+                  "send-to-flex attributes must contain 'workflowName' field for deployment purposes",
+              });
+            }
+            if (!channelName) {
+              ctx.addIssue({
+                code: "custom",
+                message:
+                  "send-to-flex attributes must contain 'channelName' field (corresponding to a TaskChannel uniqueName) for deployment purposes",
+              });
+            }
+          }),
       })
       .passthrough(),
   })
