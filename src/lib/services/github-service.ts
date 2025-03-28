@@ -92,7 +92,7 @@ export const GithubService = (ghToken: string): IGithubService => {
         owner,
         repo,
         path,
-        tag,
+        ref: tag,
       });
       const content = Buffer.from((contentResponse.data as any).content, "base64").toString();
       return content;
