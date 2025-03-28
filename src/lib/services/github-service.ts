@@ -16,8 +16,14 @@ const GH_FILE_MODE = "100644" as const;
 export const GithubService = (ghToken: string): IGithubService => {
   const octokit = getOctokit(ghToken).rest;
 
-  const { GITHUB_REPOSITORY, GITHUB_ACTOR, GITHUB_SERVER_URL, GITHUB_REF_NAME, GITHUB_RUN_ID } =
-    process.env;
+  const {
+    GITHUB_REPOSITORY,
+    GITHUB_ACTOR,
+    GITHUB_SERVER_URL,
+    GITHUB_REF_NAME,
+    GITHUB_SHA,
+    GITHUB_RUN_ID,
+  } = process.env;
   const [owner, repo] = process.env.GITHUB_REPOSITORY!.split("/");
 
   return {
@@ -34,13 +40,12 @@ export const GithubService = (ghToken: string): IGithubService => {
 
       commands.logDebug("...List commits");
 
-      const commits = await octokit.repos.listCommits({
+      const latestCommit = await octokit.git.getCommit({
         owner,
         repo,
-        per_page: 1,
+        commit_sha: GITHUB_SHA!,
       });
-      const latestCommitSha = commits.data[0].sha;
-      const treeSha = commits.data[0].commit.tree.sha;
+      const treeSha = latestCommit.data.tree.sha;
 
       commands.logDebug(`...Create tree ${treeSha}`);
 
@@ -51,14 +56,14 @@ export const GithubService = (ghToken: string): IGithubService => {
         base_tree: treeSha,
       });
 
-      commands.logDebug(`...Create commit ${newTree.data.sha} under parent ${latestCommitSha}`);
+      commands.logDebug(`...Create commit ${newTree.data.sha} under parent ${treeSha}`);
 
       const newCommit = await octokit.git.createCommit({
         owner,
         repo,
         tree: newTree.data.sha,
         message,
-        parents: [latestCommitSha],
+        parents: [GITHUB_SHA!],
         author: {
           name: `${GITHUB_ACTOR}`,
           email: `${GITHUB_ACTOR}@users.noreply.github.com`,
