@@ -223,9 +223,10 @@ const run = async () => {
       if (saveDiagramsPath) {
         commands.logInfo("Generating diagrams...");
         for (const flow of flowWrites) {
-          const diagram = generateMermaidSingleDiagram(flow.new);
-          if (!diagram) continue;
-          const svgContent = await convertMermaidDiagramToSvg(diagram.content);
+          const oldDiagram = flow.old ? generateMermaidSingleDiagram(flow.old) : null;
+          const newDiagram = generateMermaidSingleDiagram(flow.new);
+          if (!newDiagram || newDiagram.content === oldDiagram?.content) continue;
+          const svgContent = await convertMermaidDiagramToSvg(newDiagram.content);
 
           filesToCommit.push({
             path: `${saveDiagramsPath}/${basename(flow.path, ".json")}.svg`,
