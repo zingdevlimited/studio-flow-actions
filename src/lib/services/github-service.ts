@@ -38,8 +38,6 @@ export const GithubService = (ghToken: string): IGithubService => {
         content: f.content,
       }));
 
-      commands.logDebug("...List commits");
-
       const latestCommit = await octokit.git.getCommit({
         owner,
         repo,
@@ -47,7 +45,7 @@ export const GithubService = (ghToken: string): IGithubService => {
       });
       const treeSha = latestCommit.data.tree.sha;
 
-      commands.logDebug(`...Create tree ${treeSha}`);
+      commands.logDebug(`...Get tree ${treeSha} from commit ${GITHUB_SHA!}`);
 
       const newTree = await octokit.git.createTree({
         owner,
@@ -56,7 +54,7 @@ export const GithubService = (ghToken: string): IGithubService => {
         base_tree: treeSha,
       });
 
-      commands.logDebug(`...Create commit ${newTree.data.sha} under parent ${treeSha}`);
+      commands.logDebug(`...Created tree ${newTree.data.sha} under parent ${treeSha}`);
 
       const newCommit = await octokit.git.createCommit({
         owner,
@@ -70,7 +68,7 @@ export const GithubService = (ghToken: string): IGithubService => {
         },
       });
 
-      commands.logDebug(`...Create ref ${newCommit.data.sha} under ${branch}`);
+      commands.logDebug(`...Created commit ${newCommit.data.sha} under ${branch}`);
 
       await octokit.git.createRef({
         owner,
@@ -78,6 +76,8 @@ export const GithubService = (ghToken: string): IGithubService => {
         sha: newCommit.data.sha,
         ref: `refs/heads/${branch}`,
       });
+
+      commands.logDebug(`...Created ref ${newCommit.data.sha} under refs/heads/${branch}`);
     },
     openPullRequest: async (branch, title, body) => {
       commands.logDebug(`GithubService: Open PR '${title}' at '${branch}'`);
