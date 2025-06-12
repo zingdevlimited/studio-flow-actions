@@ -11,6 +11,9 @@ inputs:
   TWILIO_API_SECRET:
     required: true
     description: The Twilio Api Secret
+  COMMIT_MESSAGE:
+    required: false
+    description: (Optional) Commit message in the Studio Flow revisions
   TOKEN:
     required: false
     description: "A GitHub token with `contents:read` permission (used if required files are not already checked out)"

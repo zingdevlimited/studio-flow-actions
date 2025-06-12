@@ -11,6 +11,10 @@ inputs:
   TWILIO_API_SECRET:
     required: true
     description: The Twilio Api Secret
+  VALIDATE_PREVIOUS_REVISION_USER:
+    required: false
+    description: Set to `true` to fail the action when it is detected that the previous Studio Flow revision was changed by a different source.
+    default: false
   TOKEN:
     required: false
     description: "A GitHub token with `contents:read` permission (used if required files are not already checked out)"
