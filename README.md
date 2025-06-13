@@ -82,8 +82,9 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Validate all referenced Twilio resources exist
-3. Replace all account-specific values in the Flow Definition JSONs
-4. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the Flow Definitions are valid
+3. If **VALIDATE_PREVIOUS_REVISION_USER** is set to `true` and the Studio Flow exists, fail if the active revision does not have `[Auto Deploy]` in the commit message
+4. Replace all account-specific values in the Flow Definition JSONs
+5. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the Flow Definitions are valid
 
 ```yaml
 jobs:
