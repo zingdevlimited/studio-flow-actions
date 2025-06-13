@@ -25,7 +25,7 @@ const run = async () => {
           flowInstance = flowService.bySidOrNull(flowConfig.sid);
         }
 
-        if (flowInstance && !flowInstance.commitMessage?.startsWith("[AUTO DEPLOY]")) {
+        if (flowInstance && !flowInstance.commitMessage?.startsWith("[Auto Deploy]")) {
           success = false;
           commands.logError(
             `Flow ${flowConfig.name} (${flowInstance.sid}) was previously modified outside of the deployment process.`

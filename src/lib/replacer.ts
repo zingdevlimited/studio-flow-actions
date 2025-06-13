@@ -89,7 +89,7 @@ export const performReplacements = async (
             const createdFlow = await twilioClient.studio.v2.flows.create({
               friendlyName: flowConfig.name,
               definition: studioFlowDefinition,
-              commitMessage: `[AUTO DEPLOY]${commands.getOptionalInput("COMMIT_MESSAGE")}`,
+              commitMessage: `[Auto Deploy]${commands.getOptionalInput("COMMIT_MESSAGE")}`,
               status: "published",
             });
             studioFlowMap[flowConfig.name] = createdFlow.sid;
@@ -102,7 +102,7 @@ export const performReplacements = async (
         } else {
           await twilioClient.studio.v2.flows(sid).update({
             definition: studioFlowDefinition,
-            commitMessage: `[AUTO DEPLOY]${commands.getOptionalInput("COMMIT_MESSAGE")}`,
+            commitMessage: `[Auto Deploy]${commands.getOptionalInput("COMMIT_MESSAGE")}`,
             status: "published",
           });
         }
