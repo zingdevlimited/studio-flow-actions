@@ -3,6 +3,8 @@ import { commands } from "../../lib/helpers/commands";
 import { getTwilioClient } from "../../lib/helpers/twilio-client";
 import { prepareServices } from "../../lib/prepare-services";
 import { performReplacements } from "../../lib/replacer";
+import { FlowService } from "src/lib/services/flow-service";
+import { FlowInstance } from "twilio/lib/rest/studio/v2/flow";
 
 const run = async () => {
   try {
@@ -12,6 +14,25 @@ const run = async () => {
     const twilioServices = await prepareServices(configuration, twilioClient);
 
     let success = true;
+
+    if (commands.getOptionalInput("VALIDATE_PREVIOUS_REVISION_USER") === "true") {
+      const flowService = await FlowService(twilioClient);
+      for (const flowConfig of configuration.flows) {
+        let flowInstance: FlowInstance | null;
+        if (!flowConfig.sid) {
+          flowInstance = flowService.byNameOrNull(flowConfig.name);
+        } else {
+          flowInstance = flowService.bySidOrNull(flowConfig.sid);
+        }
+
+        if (flowInstance && !flowInstance.commitMessage?.startsWith("[Auto Deploy]")) {
+          success = false;
+          commands.logError(
+            `Flow ${flowConfig.name} (${flowInstance.sid}) was previously modified outside of the deployment process.`
+          );
+        }
+      }
+    }
 
     const replacements = await performReplacements(configuration, twilioServices, "dry");
 
