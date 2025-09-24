@@ -19,6 +19,7 @@ inputs:
       - `send-to-flex` > `attributes` > `workflowName`
       - `send-to-flex` > `attributes` > `channelName`
       - `run-subflow` > `parameters` > `subflowName`
+      - `enqueue-call` > `attributes` > `workflowName`
   SAVE_DIAGRAMS_TO_PATH:
     required: false
     description: Directory to save Mermaid diagrams (as SVG files)

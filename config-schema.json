@@ -48,7 +48,8 @@
           "send-to-flex",
           "run-function",
           "run-subflow",
-          "set-variables"
+          "set-variables",
+          "enqueue-call"
         ]
       },
       "description": "The list of widget types that can be updated on deployment",

@@ -1,5 +1,10 @@
 import { FunctionMap, getUrlComponents } from "../services/serverless";
-import { ManagedWidget, StudioFlow, parseSendToFlexRequiredAttributes } from "./studio-schemas";
+import {
+  ManagedWidget,
+  StudioFlow,
+  parseSendToFlexRequiredAttributes,
+  parseEnqueueCallRequiredAttributes,
+} from "./studio-schemas";
 
 type UpdateWidgetResult = {
   changes: Array<{ widget: string; type: string; field: string; value: string }>;
@@ -141,6 +146,30 @@ export const updateRunSubflowWidgets = (
       type,
       field: "flow_sid",
       value: subflowSid ?? "<Known after deploy>",
+    });
+  }
+
+  return { changes };
+};
+
+export const updateEnqueueCallWidgets = (
+  states: ManagedWidget[],
+  workflowsMap: Record<string, string>
+): UpdateWidgetResult => {
+  const type = "enqueue-call";
+  const changes = [];
+  for (const state of states) {
+    if (state.type !== type) continue;
+
+    const { workflowName } = parseEnqueueCallRequiredAttributes(state.properties.task_attributes);
+
+    const workflowSid = workflowsMap[workflowName!];
+    state.properties.workflow_sid = workflowSid;
+    changes.push({
+      widget: state.name,
+      type,
+      field: "workflow_sid",
+      value: workflowSid,
     });
   }
 

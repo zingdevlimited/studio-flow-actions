@@ -7,6 +7,7 @@ import {
   updateRunSubflowWidgets,
   updateSetVariableWidgets,
   setWidgetProperty,
+  updateEnqueueCallWidgets,
 } from "./helpers/widgets";
 import { TwilioServices } from "./prepare-services";
 
@@ -53,6 +54,10 @@ export const performReplacements = async (
         managedWidgets,
         configuration.variableReplacements ?? {}
       );
+      changes.push(...res.changes);
+    }
+    if (configuration.replaceWidgetTypes.includes("enqueue-call")) {
+      const res = updateEnqueueCallWidgets(managedWidgets, workflowMap);
       changes.push(...res.changes);
     }
 
