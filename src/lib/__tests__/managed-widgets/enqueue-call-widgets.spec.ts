@@ -53,7 +53,7 @@ const mockServices: TwilioServices = {
   twilioClient: {} as any,
 };
 
-describe("getManagedWidgets (send-to-flex)", () => {
+describe("getManagedWidgets (enqueue-call)", () => {
   it("Succeeds with widget matching configuration", () => {
     const flow = mockFlowWithWidget(getCorrectWidget());
 
