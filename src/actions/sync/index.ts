@@ -10,8 +10,9 @@ import { basename, dirname } from "path";
 import {
   ManagedWidget,
   StudioFlow,
-  addPropertyToFlexAttributesString,
+  addPropertyToAttributesString,
   getManagedWidgets,
+  parseEnqueueCallRequiredAttributes,
   parseSendToFlexRequiredAttributes,
   studioFlowSchema,
 } from "../../lib/helpers/studio-schemas";
@@ -61,7 +62,7 @@ const autoAddMissingWidgetProperties = async (
           continue;
         }
 
-        attributesString = addPropertyToFlexAttributesString(
+        attributesString = addPropertyToAttributesString(
           attributesString,
           "workflowName",
           workflowName
@@ -81,7 +82,7 @@ const autoAddMissingWidgetProperties = async (
           continue;
         }
 
-        attributesString = addPropertyToFlexAttributesString(
+        attributesString = addPropertyToAttributesString(
           attributesString,
           "channelName",
           channelName
@@ -118,6 +119,40 @@ const autoAddMissingWidgetProperties = async (
         });
         adjustments.push(`- **${state.name}.parameters.subflowName** <- \`${subflowName}\``);
       }
+    } else if (state.type === "enqueue-call") {
+      const widgetProperties = (state as ManagedWidget & { type: "enqueue-call" }).properties;
+      let attributesString = widgetProperties.task_attributes ?? "{}";
+      const existing = parseEnqueueCallRequiredAttributes(attributesString);
+
+      if (!existing.workflowName) {
+        let workflowName: string | undefined = undefined;
+        if (configuration.workflowMap) {
+          workflowName = Object.keys(configuration.workflowMap).find(
+            (key) => configuration.workflowMap![key] === widgetProperties.workflow
+          );
+        }
+        if (!workflowName) {
+          workflowName = Object.keys(remoteWorkflowMap).find(
+            (key) => remoteWorkflowMap[key] === widgetProperties.workflow
+          );
+        }
+        if (!workflowName) {
+          commands.setFailed(
+            `[${friendlyName}][${state.name}]: Workflow with sid ${widgetProperties.workflow} does not exist on this Twilio account. Please select a valid workflow through the Studio Flow editor.`
+          );
+          continue;
+        }
+
+        attributesString = addPropertyToAttributesString(
+          attributesString,
+          "workflowName",
+          workflowName
+        );
+
+        adjustments.push(`- **${state.name}.attributes.workflowName** <- \`${workflowName}\``);
+      }
+
+      widgetProperties.attributes = attributesString;
     }
   }
 

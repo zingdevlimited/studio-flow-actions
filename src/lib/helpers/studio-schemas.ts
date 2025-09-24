@@ -7,7 +7,7 @@ import color from "ansi-colors";
 
 export const FUNCTION_URL_REGEX = /https:\/\/(\S+)-\d\d\d\d(-(\S+))?\.twil\.io(\/\S*)/;
 
-const SEND_TO_FLEX_WORKFLOW_NAME_REGEX = /"workflowName"\s*:\s*"([\w\s-]+)"/;
+const WORKFLOW_NAME_REGEX = /"workflowName"\s*:\s*"([\w\s-]+)"/;
 const SEND_TO_FLEX_CHANNEL_NAME_REGEX = /"channelName"\s*:\s*"([\w\s-]+)"/;
 
 const baseWidgetSchema = z
@@ -47,7 +47,7 @@ const runFunctionWidgetSchema = z
   .merge(baseWidgetSchema);
 
 export const parseSendToFlexRequiredAttributes = (attributes: string) => {
-  const workflowNameMatch = SEND_TO_FLEX_WORKFLOW_NAME_REGEX.exec(attributes);
+  const workflowNameMatch = WORKFLOW_NAME_REGEX.exec(attributes);
   const channelNameMatch = SEND_TO_FLEX_CHANNEL_NAME_REGEX.exec(attributes);
 
   const workflowName = workflowNameMatch?.[1] ?? null;
@@ -56,7 +56,7 @@ export const parseSendToFlexRequiredAttributes = (attributes: string) => {
   return { workflowName, channelName };
 };
 
-export const addPropertyToFlexAttributesString = (
+export const addPropertyToAttributesString = (
   attributes: string,
   propertyKey: string,
   propertyValue: string
@@ -66,6 +66,14 @@ export const addPropertyToFlexAttributesString = (
   } else {
     return "{" + `"${propertyKey}":"${propertyValue}",` + attributes.substring(1);
   }
+};
+
+export const parseEnqueueCallRequiredAttributes = (attributes: string) => {
+  const workflowNameMatch = WORKFLOW_NAME_REGEX.exec(attributes);
+
+  const workflowName = workflowNameMatch?.[1] ?? null;
+
+  return { workflowName };
 };
 
 const sendToFlexWidgetSchema = z
@@ -139,11 +147,36 @@ const runSubflowWidgetSchema = z
   })
   .merge(baseWidgetSchema);
 
+const enqueueCallWidgetSchema = z
+  .object({
+    type: z.literal("enqueue-call"),
+    properties: z
+      .object({
+        workflow_sid: z.string().startsWith("WW"),
+        task_attributes: z
+          .string()
+          .default("{}")
+          .superRefine((attr, ctx) => {
+            const { workflowName } = parseEnqueueCallRequiredAttributes(attr);
+            if (!workflowName) {
+              ctx.addIssue({
+                code: "custom",
+                message:
+                  "enqueue-call attributes must contain 'workflowName' field for deployment purposes",
+              });
+            }
+          }),
+      })
+      .passthrough(),
+  })
+  .merge(baseWidgetSchema);
+
 const studioStateSchema = z.discriminatedUnion("type", [
   runFunctionWidgetSchema,
   sendToFlexWidgetSchema,
   setVariablesWidgetSchema,
   runSubflowWidgetSchema,
+  enqueueCallWidgetSchema,
 ]);
 
 export const MANAGED_WIDGET_TYPES = [
@@ -151,6 +184,7 @@ export const MANAGED_WIDGET_TYPES = [
   "send-to-flex",
   "set-variables",
   "run-subflow",
+  "enqueue-call",
 ] as const;
 
 export const studioFlowTransitionSchema = z.object({
@@ -286,6 +320,21 @@ export const getManagedWidgets = (
               code: "custom",
               path: ["properties", "parameters", "subflowName"],
               message: `Unknown subflowName '${subflowName}'. (Must match either a Friendly Name OR the name of a subflow with 'allowCreate' enabled OR the key of a 'subflowMap' entry in your config file)`,
+            });
+          }
+        }
+        return;
+      case "enqueue-call":
+        if (twilioServices) {
+          const { workflowName } = parseEnqueueCallRequiredAttributes(
+            state.properties.task_attributes
+          );
+
+          if (!twilioServices.workflowMap[workflowName!]) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["properties", "task_attributes", "workflowName"],
+              message: `Unknown workflowName '${workflowName}'. (Must match either a Friendly Name OR the key of a 'workflowMap' entry in your config file)`,
             });
           }
         }

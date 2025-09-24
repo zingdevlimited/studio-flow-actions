@@ -180,6 +180,44 @@ Set the `workflowName` attribute to match the Workflow **Friendly Name**, and th
 
 Set the `workflowName` attribute to match a key in the `workflowMap` object. In this example you would set it to `voiceWorkflow`. Set the `channelName` attribute to match the TaskChannel **Unique Name**.
 
+### Enqueue Call
+
+Update Enqueue Call widgets with the correct Workflow SID.
+
+Using the Studio Flow Editor, you need to add `workflowName` to the task attributes for this replacement to work.
+
+#### Option 1: Using Friendly Names
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
+  "flows": [(...)],
+  "replaceWidgetTypes": [
+    "enqueue-call"
+  ]
+}
+```
+
+Set the `workflowName` attribute to match the Workflow **Friendly Name**.
+
+#### Option 2: Using Known Sids
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
+  "flows": [(...)],
+  "enableShellVariables": true,
+  "replaceWidgetTypes": [
+    "enqueue-call"
+  ],
+  "workflowMap": {
+    "voiceWorkflow": "$VOICE_WORKFLOW_SID"
+  }
+}
+```
+
+Set the `workflowName` attribute to match a key in the `workflowMap` object. In this example you would set it to `voiceWorkflow`.
+
 ## Shell Variables in Configuration
 
 If you set `enableShellVariables` to true, you can use **\$VARIABLE_NAME** references in your configuration file. You can then use an env block in your action call to replace the values of these variables:
