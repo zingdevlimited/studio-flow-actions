@@ -67,7 +67,7 @@ const getServiceFunctions = async (
       functions: functionVersions,
     };
   } catch (err) {
-    console.error(err);
+    console.error("Error when trying to get service functions", err);
     exit(1);
   }
 };

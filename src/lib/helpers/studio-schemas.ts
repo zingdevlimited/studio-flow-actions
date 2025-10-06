@@ -354,7 +354,7 @@ export const getManagedWidgets = (
           .map((i) => `    ${color.yellow("[" + i.path.join(".") + "]")} ${i.message}`)
           .join("\n");
 
-        commands.logError(`${logMessage}\n${issueMessages}`);
+        commands.logError(`Error when getting managed widgets: ${logMessage}\n${issueMessages}`);
         return null;
       } else {
         return res.data;
