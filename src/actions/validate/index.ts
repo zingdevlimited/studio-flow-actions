@@ -61,7 +61,7 @@ const run = async () => {
           ) {
             continue;
           }
-          commands.logError(JSON.stringify(error, undefined, 2));
+          commands.logError(`Error - ${JSON.stringify(error, undefined, 2)}`);
           success = false;
         }
       }

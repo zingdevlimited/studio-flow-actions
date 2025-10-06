@@ -1,5 +1,6 @@
 import { getOctokit } from "@actions/github";
 import { commands } from "../helpers/commands";
+import { exit } from "process";
 
 interface IGithubService {
   commitFiles: (
@@ -93,14 +94,20 @@ export const GithubService = (ghToken: string): IGithubService => {
     },
     getFileContent: async (path, tag) => {
       commands.logDebug(`GithubService: Get File '${path}' at '${tag}'`);
-      const contentResponse = await octokit.repos.getContent({
-        owner,
-        repo,
-        path,
-        ref: tag,
-      });
-      const content = Buffer.from((contentResponse.data as any).content, "base64").toString();
-      return content;
+      try {
+        const contentResponse = await octokit.repos.getContent({
+          owner,
+          repo,
+          path,
+          ref: tag,
+        });
+        const content = Buffer.from((contentResponse.data as any).content, "base64").toString();
+        return content;
+      } catch (err) {
+        commands.logError(`GithubService: Failed to get file content - ${err}`);
+        commands.setFailed(`Failed to retrieve file content for ${path}`);
+        exit(1);
+      }
     },
   };
 };
