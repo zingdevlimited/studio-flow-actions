@@ -2540,12 +2540,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.0.0":
-  version: 22.19.15
-  resolution: "@types/node@npm:22.19.15"
+"@types/node@npm:^20.8.7":
+  version: 20.19.37
+  resolution: "@types/node@npm:20.19.37"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10c0/f17eaf3d0d1da5e93ad9e287efb78201f8a5282973c004c5f70d91675c5c6b926a23acaa7b158a42b3d7e27e36b349d65a531710c91c308fca53dd7fa280ef98
+  checksum: 10c0/8420353aee776ae5c1e9720058949909a0e908fa2af85501e9db2645bb9f9acd7d767890f8aaee34d375e6f8b5f550a9a169e908d2d8cf7d5daf63dce64092a0
   languageName: node
   linkType: hard
 
@@ -7770,7 +7770,7 @@ __metadata:
     "@babel/plugin-syntax-flow": "npm:^7.14.5"
     "@babel/plugin-transform-react-jsx": "npm:^7.14.9"
     "@types/jest": "npm:^29.5.6"
-    "@types/node": "npm:^22.0.0"
+    "@types/node": "npm:^20.8.7"
     "@typescript-eslint/eslint-plugin": "npm:^6.8.0"
     "@typescript-eslint/parser": "npm:^6.8.0"
     ansi-colors: "npm:^4.1.3"
