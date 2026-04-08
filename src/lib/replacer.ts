@@ -11,12 +11,18 @@ import {
 } from "./helpers/widgets";
 import { TwilioServices } from "./prepare-services";
 
+type PerformReplacementOptions = {
+  skipFlowNames?: string[];
+};
+
 export const performReplacements = async (
   configuration: ConfigFile,
   twilioServices: TwilioServices,
-  runMode: "deploy" | "dry"
+  runMode: "deploy" | "dry",
+  options?: PerformReplacementOptions
 ) => {
   const { functionMap, channelMap, workflowMap, studioFlowMap } = twilioServices;
+  const skipFlowNames = new Set(options?.skipFlowNames ?? []);
 
   const results = [];
 
@@ -25,6 +31,10 @@ export const performReplacements = async (
   );
 
   for (const flowConfig of sortedFlows) {
+    if (skipFlowNames.has(flowConfig.name)) {
+      continue;
+    }
+
     const flowJsonContent = await readFileLocalOrRemote(flowConfig.path);
     const studioFlowDefinition = studioFlowSchema.parse(JSON.parse(flowJsonContent));
 
