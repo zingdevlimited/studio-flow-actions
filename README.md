@@ -82,9 +82,11 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Validate all referenced Twilio resources exist
-3. If **VALIDATE_PREVIOUS_REVISION_USER** is set to `true` and the Studio Flow exists, fail if the active revision does not have `[Auto Deploy]` in the commit message
-4. Replace all account-specific values in the Flow Definition JSONs
-5. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the Flow Definitions are valid
+3. If **VALIDATE_PREVIOUS_REVISION_USER** is set to `true` and the Studio Flow exists, detect manual changes by checking whether the active revision commit message starts with `[Auto Deploy]`
+4. If **ALLOW_PARTIAL_DEPLOY** is `false` (default), any manually changed flow fails the run (existing behavior)
+5. If **ALLOW_PARTIAL_DEPLOY** is `true`, manually changed flows are reported as warnings and skipped in partial mode
+6. Replace all account-specific values in the Flow Definition JSONs
+7. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the Flow Definitions are valid
 
 ```yaml
 jobs:
@@ -97,6 +99,8 @@ jobs:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
           TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
+          VALIDATE_PREVIOUS_REVISION_USER: true
+          ALLOW_PARTIAL_DEPLOY: true
         env:
           ASSETS_BASE_URL: https://myassets-1234.twil.io
 ```
@@ -107,7 +111,10 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Replace all account-specific values in the Flow Definition JSONs
-3. Create/Update the Studio Flows in the account specified
+3. If **ALLOW_PARTIAL_DEPLOY** is `true`, skip flows detected as manually changed and continue deploying unaffected flows
+4. Create/Update the Studio Flows in the account specified
+
+By default, **ALLOW_PARTIAL_DEPLOY** is `false`, so existing pipelines keep the current all-or-nothing validation guard.
 
 ```yaml
 jobs:
@@ -120,6 +127,7 @@ jobs:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
           TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
+          ALLOW_PARTIAL_DEPLOY: true
         env:
           ASSETS_BASE_URL: https://myassets-1234.twil.io
 ```
