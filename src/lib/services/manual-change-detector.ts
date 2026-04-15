@@ -50,7 +50,7 @@ export const detectManualChangeForFlow = (
     commitMessage,
     status: "manually_changed",
     reason:
-      "Latest revision does not contain an [Auto Deploy] commit message and is treated as manually changed.",
+      "Latest revision does not start with [Auto Deploy] and is treated as manually changed.",
   };
 };
 
