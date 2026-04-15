@@ -3,7 +3,6 @@ import { getTwilioClient } from "../../lib/helpers/twilio-client";
 import { getConfiguration } from "../../lib/helpers/config";
 import { prepareServices } from "../../lib/prepare-services";
 import { performReplacements } from "../../lib/replacer";
-import { FlowService } from "../../lib/services/flow-service";
 import { detectManualChangeForFlows } from "../../lib/services/manual-change-detector";
 
 const run = async () => {
@@ -16,8 +15,7 @@ const run = async () => {
     const twilioServices = await prepareServices(configuration, twilioClient);
 
     if (allowPartialDeploy) {
-      const flowService = await FlowService(twilioClient);
-      const detectionResults = detectManualChangeForFlows(configuration.flows, flowService);
+      const detectionResults = detectManualChangeForFlows(configuration.flows, twilioServices.flowService);
       const manuallyChangedFlows = detectionResults.filter((flow) => flow.status === "manually_changed");
 
       skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
