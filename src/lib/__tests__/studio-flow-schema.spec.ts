@@ -1,6 +1,11 @@
 /// <reference types="jest" />
 
-import { studioFlowSchema } from "../helpers/studio-schemas";
+import {
+  IS_BLANK_CONDITION_TYPE,
+  IS_NOT_BLANK_CONDITION_TYPE,
+  studioFlowSchema,
+} from "../helpers/studio-schemas";
+import { generateMermaidSingleDiagram } from "../helpers/mermaid-diagram";
 
 describe("studioFlowSchema", () => {
   it("accepts is_blank and is_not_blank split conditions without a value", () => {
@@ -25,7 +30,7 @@ describe("studioFlowSchema", () => {
                 {
                   friendly_name: "If value is_blank",
                   arguments: ["{{trigger.parent.parameters.license_plate}}"],
-                  type: "is_blank",
+                  type: IS_BLANK_CONDITION_TYPE,
                 },
               ],
             },
@@ -35,7 +40,7 @@ describe("studioFlowSchema", () => {
                 {
                   friendly_name: "If value is_not_blank",
                   arguments: ["{{trigger.parent.parameters.license_plate}}"],
-                  type: "is_not_blank",
+                  type: IS_NOT_BLANK_CONDITION_TYPE,
                 },
               ],
             },
@@ -92,5 +97,44 @@ describe("studioFlowSchema", () => {
         }),
       ])
     );
+  });
+
+  it("renders is_blank and is_not_blank split conditions without an undefined value", () => {
+    const flow = studioFlowSchema.parse({
+      description: "Incoming Lead Subflow",
+      initial_state: "Trigger",
+      flags: { allow_concurrent_calls: true },
+      states: [
+        {
+          name: "Trigger",
+          type: "trigger",
+          transitions: [],
+          properties: {},
+        },
+        {
+          name: "split_on_license_plate",
+          type: "split-based-on",
+          transitions: [
+            {
+              event: "match",
+              next: "Trigger",
+              conditions: [
+                {
+                  friendly_name: "If value is_blank",
+                  arguments: ["{{trigger.parent.parameters.license_plate}}"],
+                  type: IS_BLANK_CONDITION_TYPE,
+                },
+              ],
+            },
+          ],
+          properties: {},
+        },
+      ],
+    });
+
+    const diagram = generateMermaidSingleDiagram(flow);
+
+    expect(diagram?.content).toContain(`match: ${IS_BLANK_CONDITION_TYPE}`);
+    expect(diagram?.content).not.toContain("undefined");
   });
 });

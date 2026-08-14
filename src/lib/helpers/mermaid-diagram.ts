@@ -97,7 +97,9 @@ class MermaidBuilder {
     for (const transition of transitions) {
       if (!transition.next) continue;
       let label = transition.event;
-      let conditions = transition.conditions?.map((c) => `${c.type} ${c.value}`).join(", ");
+      let conditions = transition.conditions
+        ?.map((c) => (c.value === undefined ? c.type : `${c.type} ${c.value}`))
+        .join(", ");
       if (conditions) {
         label = `${label}: ${conditions}`;
       }
