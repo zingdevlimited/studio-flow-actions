@@ -3,7 +3,7 @@
 import { studioFlowSchema } from "../helpers/studio-schemas";
 
 describe("studioFlowSchema", () => {
-  it("accepts unary split conditions without a value", () => {
+  it("accepts is_blank and is_not_blank split conditions without a value", () => {
     const result = studioFlowSchema.safeParse({
       description: "Incoming Lead Subflow",
       initial_state: "Trigger",
