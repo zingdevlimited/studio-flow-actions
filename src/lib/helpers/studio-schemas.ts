@@ -187,17 +187,35 @@ export const MANAGED_WIDGET_TYPES = [
   "enqueue-call",
 ] as const;
 
+export const IS_BLANK_CONDITION_TYPE = "is_blank";
+export const IS_NOT_BLANK_CONDITION_TYPE = "is_not_blank";
+
+const VALUE_OPTIONAL_CONDITION_TYPES = [IS_BLANK_CONDITION_TYPE, IS_NOT_BLANK_CONDITION_TYPE];
+
 export const studioFlowTransitionSchema = z.object({
   event: z.string(),
   next: z.string().optional(),
   conditions: z
     .array(
-      z.object({
-        friendly_name: z.string(),
-        arguments: z.array(z.string()),
-        type: z.string(),
-        value: z.string(),
-      })
+      z
+        .object({
+          friendly_name: z.string(),
+          arguments: z.array(z.string()),
+          type: z.string(),
+          value: z.string().optional(),
+        })
+        .superRefine((condition, ctx) => {
+          if (
+            !VALUE_OPTIONAL_CONDITION_TYPES.includes(condition.type) &&
+            condition.value === undefined
+          ) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["value"],
+              message: `Required for the condition type '${condition.type}'`,
+            });
+          }
+        })
     )
     .optional(),
 });
