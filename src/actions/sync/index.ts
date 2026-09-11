@@ -94,6 +94,9 @@ const autoAddMissingWidgetProperties = async (
       widgetProperties.attributes = attributesString;
     } else if (state.type === "run-subflow") {
       const widgetProperties = (state as ManagedWidget & { type: "run-subflow" }).properties;
+      if (!widgetProperties.parameters) {
+        widgetProperties.parameters = [];
+      }
       if (!widgetProperties.parameters.find((p) => p.key === "subflowName")) {
         let subflowName: string | undefined = undefined;
         if (configuration.subflowMap) {
