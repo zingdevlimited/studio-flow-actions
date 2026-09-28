@@ -12,7 +12,7 @@ on:
 env:
   TWILIO_API_KEY: ${{ vars[format('{0}_TWILIO_API_KEY', inputs.ENVIRONMENT)] }}
   TWILIO_API_SECRET: ${{ secrets[format('{0}_TWILIO_API_SECRET', inputs.ENVIRONMENT)] }}
-          
+
 jobs:
   validate:
     runs-on: ubuntu-22.04
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # Ensure the same inputs are used as the validate step
-      - uses: zingdevlimited/studio-flow-actions/deploy@v1 
+      - uses: zingdevlimited/studio-flow-actions/deploy@v1
         with:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
@@ -38,5 +38,4 @@ jobs:
           ALLOW_PARTIAL_DEPLOY: false
         env:
           ASSETS_BASE_URL: https://yourassets.com
-
 # With ALLOW_PARTIAL_DEPLOY=false, all flows are deployed regardless of manual changes.

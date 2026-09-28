@@ -82,8 +82,13 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Validate all referenced Twilio resources exist
-3. Replace all account-specific values in the Flow Definition JSONs
-4. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the Flow Definitions are valid
+3. When **ALLOW_PARTIAL_DEPLOY** is `true`, skip flows detected as manually changed and warn instead of validating them
+4. Replace all account-specific values in the Flow Definition JSONs
+5. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the remaining Flow Definitions are valid
+
+Set **VALIDATE_PREVIOUS_REVISION_USER** to `true` to enforce strict behavior
+that fails when a manually changed flow is detected. This option cannot be used
+with **ALLOW_PARTIAL_DEPLOY**.
 
 ```yaml
 jobs:
@@ -106,10 +111,11 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Replace all account-specific values in the Flow Definition JSONs
-3. If **ALLOW_PARTIAL_DEPLOY** is `true`, skip flows detected as manually changed and continue deploying unaffected flows
+3. If **ALLOW_PARTIAL_DEPLOY** is `true`, skip flows detected as manually changed and continue deploying the remaining flows
 4. Create/Update the Studio Flows in the account specified
 
-By default, **ALLOW_PARTIAL_DEPLOY** is `false`, so existing pipelines keep the current all-or-nothing validation guard.
+By default, **ALLOW_PARTIAL_DEPLOY** is `false`, so all configured flows are deployed.
+Use the same option on the Validate action when a workflow validates before deploying.
 
 ```yaml
 jobs:
