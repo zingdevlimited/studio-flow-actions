@@ -124,6 +124,7 @@ export const performReplacements = async (
       } else {
         await twilioClient.studio.v2.flows(flowConfig.sid).update({
           definition: studioFlowDefinition,
+          commitMessage: `[Auto Deploy] ${commands.getOptionalInput("COMMIT_MESSAGE")}`,
           status: "published",
         });
       }

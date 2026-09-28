@@ -11,6 +11,14 @@ inputs:
   TWILIO_API_SECRET:
     required: true
     description: The Twilio Api Secret
+  ALLOW_PARTIAL_DEPLOY:
+    required: false
+    description: Set to `true` to warn and skip manually changed flows during validation.
+    default: false
+  VALIDATE_PREVIOUS_REVISION_USER:
+    required: false
+    description: Deprecated. Set to `true` to fail when a flow was manually changed instead of allowing partial validation.
+    default: false
   TOKEN:
     required: false
     description: "A GitHub token with `contents:read` permission (used if required files are not already checked out)"

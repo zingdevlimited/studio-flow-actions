@@ -3,6 +3,7 @@ import { commands } from "../../lib/helpers/commands";
 import { getTwilioClient } from "../../lib/helpers/twilio-client";
 import { prepareServices } from "../../lib/prepare-services";
 import { performReplacements } from "../../lib/replacer";
+import { detectManualChangeForFlows } from "../../lib/services/manual-change-detector";
 
 const run = async () => {
   try {
@@ -11,9 +12,47 @@ const run = async () => {
 
     const twilioServices = await prepareServices(configuration, twilioClient);
 
-    let success = true;
+    const allowPartialDeploy = commands.getOptionalInput("ALLOW_PARTIAL_DEPLOY") === "true";
+    const validatePreviousRevision =
+      commands.getOptionalInput("VALIDATE_PREVIOUS_REVISION_USER") === "true";
+    if (allowPartialDeploy && validatePreviousRevision) {
+      throw new Error(
+        "ALLOW_PARTIAL_DEPLOY and VALIDATE_PREVIOUS_REVISION_USER cannot both be true."
+      );
+    }
 
-    const replacements = await performReplacements(configuration, twilioServices, "dry");
+    let success = true;
+    let skipFlowNames: string[] = [];
+
+    if (allowPartialDeploy || validatePreviousRevision) {
+      const detectionResults = detectManualChangeForFlows(
+        configuration.flows,
+        twilioServices.flowService
+      );
+      const manuallyChangedFlows = detectionResults.filter(
+        (flow) => flow.status === "manually_changed"
+      );
+
+      if (allowPartialDeploy) {
+        skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
+        for (const flow of manuallyChangedFlows) {
+          commands.logWarning(
+            `Skipping validation for ${flow.flowName} because the latest revision appears to be manually changed.`
+          );
+        }
+      } else if (validatePreviousRevision) {
+        for (const flow of manuallyChangedFlows) {
+          success = false;
+          commands.logError(
+            `Flow ${flow.flowName} (${flow.resolvedSid ?? flow.configuredSid ?? "Unknown SID"}) was previously modified outside of the deployment process.`
+          );
+        }
+      }
+    }
+
+    const replacements = await performReplacements(configuration, twilioServices, "dry", {
+      skipFlowNames,
+    });
 
     for (const replacement of replacements) {
       commands.startLogGroup(replacement.flow.name);
