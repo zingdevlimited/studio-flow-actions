@@ -36,9 +36,9 @@ export const configFileSchema = z.object({
       })
     )
     .default([]),
-  workflowMap: z.record(z.string()).optional(),
-  subflowMap: z.record(z.string()).optional(),
-  variableReplacements: z.record(z.string()).optional(),
+  workflowMap: z.record(z.string(), z.string()).optional(),
+  subflowMap: z.record(z.string(), z.string()).optional(),
+  variableReplacements: z.record(z.string(), z.string()).optional(),
   customPropertyReplacements: z
     .array(
       z.object({
