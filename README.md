@@ -133,6 +133,20 @@ jobs:
           ASSETS_BASE_URL: https://myassets-1234.twil.io
 ```
 
+### Manual Revision Handling
+
+Choose the input combination that matches the desired behavior:
+
+| Mode      | Inputs                                 | Behavior                                          |
+| --------- | -------------------------------------- | ------------------------------------------------- |
+| `normal`  | Both inputs `false`                    | Validate and deploy all flows.                    |
+| `partial` | `ALLOW_PARTIAL_DEPLOY=true`            | Warn, skip manually changed flows, and continue.  |
+| `strict`  | `VALIDATE_PREVIOUS_REVISION_USER=true` | Fail validation when a flow was manually changed. |
+| conflict  | Both inputs `true`                     | Rejected as invalid.                              |
+
+For a validate-then-deploy workflow, use the same `ALLOW_PARTIAL_DEPLOY` value
+in both actions. Strict mode applies only to Validate.
+
 ## Samples
 
 - [Sync on Dispatch](samples/sync-on-dispatch.yaml)
