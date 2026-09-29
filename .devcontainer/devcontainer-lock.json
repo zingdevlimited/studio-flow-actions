@@ -1,0 +1,9 @@
+{
+  "features": {
+    "ghcr.io/eitsupi/devcontainer-features/jq-likes:2.1.0": {
+      "version": "2.1.0",
+      "resolved": "ghcr.io/eitsupi/devcontainer-features/jq-likes@sha256:0aa49b0a75412524e6c7073bba03694687d7f0031a10ba258981512e01de6d77",
+      "integrity": "sha256:0aa49b0a75412524e6c7073bba03694687d7f0031a10ba258981512e01de6d77"
+    }
+  }
+}
