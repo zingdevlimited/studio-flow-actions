@@ -82,9 +82,13 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Validate all referenced Twilio resources exist
-3. If **VALIDATE_PREVIOUS_REVISION_USER** is set to `true` and the Studio Flow exists, fail if the active revision does not have `[Auto Deploy]` in the commit message
+3. When **ALLOW_PARTIAL_DEPLOY** is `true`, skip flows detected as manually changed and warn instead of validating them
 4. Replace all account-specific values in the Flow Definition JSONs
-5. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the Flow Definitions are valid
+5. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the remaining Flow Definitions are valid
+
+Set **VALIDATE_PREVIOUS_REVISION_USER** to `true` to enforce strict behavior
+that fails when a flow does not appear to have been created from this deployment pipeline. This option cannot be used
+with **ALLOW_PARTIAL_DEPLOY**.
 
 ```yaml
 jobs:
@@ -107,7 +111,11 @@ This action will:
 
 1. Parse every Flow Definition file referenced in the **Studio Configuration**
 2. Replace all account-specific values in the Flow Definition JSONs
-3. Create/Update the Studio Flows in the account specified
+3. If **ALLOW_PARTIAL_DEPLOY** is `true`, skip flows detected as manually changed and continue deploying the remaining flows
+4. Create/Update the Studio Flows in the account specified
+
+By default, **ALLOW_PARTIAL_DEPLOY** is `false`, so all configured flows are deployed.
+Use the same option on the Validate action when a workflow validates before deploying.
 
 ```yaml
 jobs:
@@ -120,9 +128,25 @@ jobs:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
           TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
+          ALLOW_PARTIAL_DEPLOY: true
         env:
           ASSETS_BASE_URL: https://myassets-1234.twil.io
 ```
+
+### Modes for validate and deploy
+
+Choose the input combination that matches the desired behavior:
+
+| Mode      | Inputs                                 | Behavior                                          |
+| --------- | -------------------------------------- | ------------------------------------------------- |
+| `normal`  | Both inputs `false`                    | Validate and deploy all flows.                    |
+| `partial` | `ALLOW_PARTIAL_DEPLOY=true`            | Warn, skip manually changed flows, and continue.  |
+| `strict`  | `VALIDATE_PREVIOUS_REVISION_USER=true` | Fail validation when a flow was manually changed. |
+
+The [Validate and Deploy sample workflow](samples/validate-and-deploy.yaml) provides a dropdown for choosing one of these modes and maps it to the required action inputs.
+
+For a validate-then-deploy workflow, use the same `ALLOW_PARTIAL_DEPLOY` value
+in both actions. Strict mode applies only to Validate.
 
 ## Samples
 

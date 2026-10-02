@@ -3,8 +3,7 @@ import { commands } from "../../lib/helpers/commands";
 import { getTwilioClient } from "../../lib/helpers/twilio-client";
 import { prepareServices } from "../../lib/prepare-services";
 import { performReplacements } from "../../lib/replacer";
-import { FlowService } from "src/lib/services/flow-service";
-import { FlowInstance } from "twilio/lib/rest/studio/v2/flow";
+import { detectManualChangeForFlows } from "../../lib/services/manual-change-detector";
 
 const run = async () => {
   try {
@@ -13,28 +12,47 @@ const run = async () => {
 
     const twilioServices = await prepareServices(configuration, twilioClient);
 
+    const allowPartialDeploy = commands.getOptionalInput("ALLOW_PARTIAL_DEPLOY") === "true";
+    const validatePreviousRevision =
+      commands.getOptionalInput("VALIDATE_PREVIOUS_REVISION_USER") === "true";
+    if (allowPartialDeploy && validatePreviousRevision) {
+      throw new Error(
+        "ALLOW_PARTIAL_DEPLOY and VALIDATE_PREVIOUS_REVISION_USER cannot both be true."
+      );
+    }
+
     let success = true;
+    let skipFlowNames: string[] = [];
 
-    if (commands.getOptionalInput("VALIDATE_PREVIOUS_REVISION_USER") === "true") {
-      const flowService = await FlowService(twilioClient);
-      for (const flowConfig of configuration.flows) {
-        let flowInstance: FlowInstance | null;
-        if (!flowConfig.sid) {
-          flowInstance = flowService.byNameOrNull(flowConfig.name);
-        } else {
-          flowInstance = flowService.bySidOrNull(flowConfig.sid);
+    if (allowPartialDeploy || validatePreviousRevision) {
+      const detectionResults = detectManualChangeForFlows(
+        configuration.flows,
+        twilioServices.flowService
+      );
+      const manuallyChangedFlows = detectionResults.filter(
+        (flow) => flow.status === "manually_changed"
+      );
+
+      if (allowPartialDeploy) {
+        skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
+        for (const flow of manuallyChangedFlows) {
+          commands.logWarning(
+            `Skipping validation for ${flow.flowName} because the latest revision appears to be manually changed.`
+          );
         }
-
-        if (flowInstance && !flowInstance.commitMessage?.startsWith("[Auto Deploy]")) {
+      } else if (validatePreviousRevision) {
+        for (const flow of manuallyChangedFlows) {
           success = false;
           commands.logError(
-            `Flow ${flowConfig.name} (${flowInstance.sid}) was previously modified outside of the deployment process.`
+            `Flow ${flow.flowName} (${flow.resolvedSid ?? flow.configuredSid ?? "Unknown SID"}) was previously modified outside of the deployment process.`
           );
         }
       }
     }
 
-    const replacements = await performReplacements(configuration, twilioServices, "dry");
+    const replacements = await performReplacements(configuration, twilioServices, "dry", {
+      skipFlowNames,
+    });
 
     for (const replacement of replacements) {
       commands.startLogGroup(replacement.flow.name);

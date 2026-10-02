@@ -11,9 +11,13 @@ inputs:
   TWILIO_API_SECRET:
     required: true
     description: The Twilio Api Secret
+  ALLOW_PARTIAL_DEPLOY:
+    required: false
+    description: Set to `true` to warn and skip manually changed flows during validation.
+    default: false
   VALIDATE_PREVIOUS_REVISION_USER:
     required: false
-    description: Set to `true` to fail the action when it is detected that the previous Studio Flow revision was changed by a different source.
+    description: Set to `true` to fail if the previous Studio Flow revision was not created by this deployment pipeline.
     default: false
   TOKEN:
     required: false

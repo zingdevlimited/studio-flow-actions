@@ -44,6 +44,7 @@ export const prepareServices = async (configuration: ConfigFile, twilioClient: T
     workflowMap,
     channelMap,
     studioFlowMap,
+    flowService,
     twilioClient,
   };
 };
