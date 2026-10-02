@@ -87,7 +87,7 @@ This action will:
 5. Use the [Flow Validate](https://www.twilio.com/docs/studio/rest-api/v2/flow-validate) API to ensure the remaining Flow Definitions are valid
 
 Set **VALIDATE_PREVIOUS_REVISION_USER** to `true` to enforce strict behavior
-that fails when a manually changed flow is detected. This option cannot be used
+that fails when a flow does not appear to have been created from this deployment pipeline. This option cannot be used
 with **ALLOW_PARTIAL_DEPLOY**.
 
 ```yaml
@@ -133,7 +133,7 @@ jobs:
           ASSETS_BASE_URL: https://myassets-1234.twil.io
 ```
 
-### Manual Revision Handling
+### Modes for validate and deploy
 
 Choose the input combination that matches the desired behavior:
 
@@ -142,7 +142,8 @@ Choose the input combination that matches the desired behavior:
 | `normal`  | Both inputs `false`                    | Validate and deploy all flows.                    |
 | `partial` | `ALLOW_PARTIAL_DEPLOY=true`            | Warn, skip manually changed flows, and continue.  |
 | `strict`  | `VALIDATE_PREVIOUS_REVISION_USER=true` | Fail validation when a flow was manually changed. |
-| conflict  | Both inputs `true`                     | Rejected as invalid.                              |
+
+The [Validate and Deploy sample workflow](samples/validate-and-deploy.yaml) provides a dropdown for choosing one of these modes and maps it to the required action inputs.
 
 For a validate-then-deploy workflow, use the same `ALLOW_PARTIAL_DEPLOY` value
 in both actions. Strict mode applies only to Validate.

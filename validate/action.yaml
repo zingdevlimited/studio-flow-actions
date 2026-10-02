@@ -17,7 +17,7 @@ inputs:
     default: false
   VALIDATE_PREVIOUS_REVISION_USER:
     required: false
-    description: Deprecated. Set to `true` to fail when a flow was manually changed instead of allowing partial validation.
+    description: Set to `true` to fail if the previous Studio Flow revision was not created by this deployment pipeline.
     default: false
   TOKEN:
     required: false
