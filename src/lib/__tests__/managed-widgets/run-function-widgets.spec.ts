@@ -78,6 +78,7 @@ const mockServices: TwilioServices = {
   channelMap: {},
   studioFlowMap: {},
   workflowMap: {},
+  flowService: {} as any,
 };
 
 describe("getManagedWidgets (run-function)", () => {

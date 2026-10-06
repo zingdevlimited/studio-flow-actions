@@ -52,6 +52,7 @@ const mockServices: TwilioServices = {
   functionMap: new FunctionMap([]),
   studioFlowMap: {},
   twilioClient: {} as any,
+  flowService: {} as any,
 };
 
 describe("getManagedWidgets (send-to-flex)", () => {
