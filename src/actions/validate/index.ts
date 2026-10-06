@@ -12,11 +12,18 @@ const run = async () => {
 
     const twilioServices = await prepareServices(configuration, twilioClient);
 
-    const allowPartialDeploy = commands.getOptionalInput("ALLOW_PARTIAL_DEPLOY") === "true";
+    const manualChangeMode = commands.getOptionalInput("MANUAL_CHANGE_MODE") || "normal";
+    if (!["normal", "partial", "strict"].includes(manualChangeMode)) {
+      throw new Error(
+        `Invalid MANUAL_CHANGE_MODE '${manualChangeMode}'. Expected 'normal', 'partial', or 'strict'.`
+      );
+    }
+    const allowPartialDeploy = manualChangeMode === "partial";
+    const validatePreviousRevision = manualChangeMode === "strict";
     let success = true;
     let skipFlowNames: string[] = [];
 
-    if (allowPartialDeploy) {
+    if (allowPartialDeploy || validatePreviousRevision) {
       const detectionResults = detectManualChangeForFlows(
         configuration.flows,
         twilioServices.flowService
@@ -25,11 +32,20 @@ const run = async () => {
         (flow) => flow.status === "manually_changed"
       );
 
-      skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
-      for (const flow of manuallyChangedFlows) {
-        commands.logWarning(
-          `Skipping validation for ${flow.flowName} because the latest revision appears to be manually changed.`
-        );
+      if (allowPartialDeploy) {
+        skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
+        for (const flow of manuallyChangedFlows) {
+          commands.logWarning(
+            `Skipping validation for ${flow.flowName} because the latest revision appears to be manually changed.`
+          );
+        }
+      } else if (validatePreviousRevision) {
+        for (const flow of manuallyChangedFlows) {
+          success = false;
+          commands.logError(
+            `Flow ${flow.flowName} (${flow.resolvedSid ?? flow.configuredSid ?? "Unknown SID"}) was previously modified outside of the deployment process.`
+          );
+        }
       }
     }
 

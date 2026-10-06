@@ -63,7 +63,7 @@ const loadValidateAction = async (inputs: Record<string, string>) => {
 describe("validate action orchestration", () => {
   it("skips manually changed flows in partial mode", async () => {
     const { commands, performReplacements } = await loadValidateAction({
-      ALLOW_PARTIAL_DEPLOY: "true",
+      MANUAL_CHANGE_MODE: "partial",
     });
 
     expect(performReplacements).toHaveBeenCalledWith(configuration, { flowService: {} }, "dry", {
@@ -78,5 +78,29 @@ describe("validate action orchestration", () => {
 
     expect(detectManualChangeForFlows).not.toHaveBeenCalled();
     expect(commands.setFailed).not.toHaveBeenCalled();
+  });
+
+  it("fails when strict validation detects a manual change", async () => {
+    const { commands, performReplacements, detectManualChangeForFlows } = await loadValidateAction({
+      MANUAL_CHANGE_MODE: "strict",
+    });
+
+    expect(detectManualChangeForFlows).toHaveBeenCalledWith(configuration.flows, {});
+    expect(performReplacements).toHaveBeenCalledWith(configuration, { flowService: {} }, "dry", {
+      skipFlowNames: [],
+    });
+    expect(commands.logError).toHaveBeenCalledWith(expect.stringContaining("Manual Flow"));
+    expect(commands.setFailed).toHaveBeenCalledWith("Validation failed.");
+  });
+
+  it("rejects an unknown manual-change mode", async () => {
+    const { commands, performReplacements } = await loadValidateAction({
+      MANUAL_CHANGE_MODE: "unknown",
+    });
+
+    expect(commands.setFailed).toHaveBeenCalledWith(
+      "Invalid MANUAL_CHANGE_MODE 'unknown'. Expected 'normal', 'partial', or 'strict'."
+    );
+    expect(performReplacements).not.toHaveBeenCalled();
   });
 });
