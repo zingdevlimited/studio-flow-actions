@@ -13,18 +13,10 @@ const run = async () => {
     const twilioServices = await prepareServices(configuration, twilioClient);
 
     const allowPartialDeploy = commands.getOptionalInput("ALLOW_PARTIAL_DEPLOY") === "true";
-    const validatePreviousRevision =
-      commands.getOptionalInput("VALIDATE_PREVIOUS_REVISION_USER") === "true";
-    if (allowPartialDeploy && validatePreviousRevision) {
-      throw new Error(
-        "ALLOW_PARTIAL_DEPLOY and VALIDATE_PREVIOUS_REVISION_USER cannot both be true."
-      );
-    }
-
     let success = true;
     let skipFlowNames: string[] = [];
 
-    if (allowPartialDeploy || validatePreviousRevision) {
+    if (allowPartialDeploy) {
       const detectionResults = detectManualChangeForFlows(
         configuration.flows,
         twilioServices.flowService
@@ -33,20 +25,11 @@ const run = async () => {
         (flow) => flow.status === "manually_changed"
       );
 
-      if (allowPartialDeploy) {
-        skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
-        for (const flow of manuallyChangedFlows) {
-          commands.logWarning(
-            `Skipping validation for ${flow.flowName} because the latest revision appears to be manually changed.`
-          );
-        }
-      } else if (validatePreviousRevision) {
-        for (const flow of manuallyChangedFlows) {
-          success = false;
-          commands.logError(
-            `Flow ${flow.flowName} (${flow.resolvedSid ?? flow.configuredSid ?? "Unknown SID"}) was previously modified outside of the deployment process.`
-          );
-        }
+      skipFlowNames = manuallyChangedFlows.map((flow) => flow.flowName);
+      for (const flow of manuallyChangedFlows) {
+        commands.logWarning(
+          `Skipping validation for ${flow.flowName} because the latest revision appears to be manually changed.`
+        );
       }
     }
 

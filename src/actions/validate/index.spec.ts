@@ -33,6 +33,7 @@ const loadValidateAction = async (inputs: Record<string, string>) => {
     writeSummary: jest.fn().mockResolvedValue(undefined),
   };
   const performReplacements = jest.fn().mockResolvedValue([]);
+  const detectManualChangeForFlows = jest.fn().mockReturnValue(detectionResults);
 
   jest.resetModules();
   jest.doMock("../../lib/helpers/commands", () => ({ commands }));
@@ -49,14 +50,14 @@ const loadValidateAction = async (inputs: Record<string, string>) => {
   }));
   jest.doMock("../../lib/replacer", () => ({ performReplacements }));
   jest.doMock("../../lib/services/manual-change-detector", () => ({
-    detectManualChangeForFlows: jest.fn().mockReturnValue(detectionResults),
+    detectManualChangeForFlows,
   }));
 
   // eslint-disable-next-line global-require
   require("./index");
   await new Promise((resolve) => setImmediate(resolve));
 
-  return { commands, performReplacements };
+  return { commands, performReplacements, detectManualChangeForFlows };
 };
 
 describe("validate action orchestration", () => {
@@ -72,27 +73,10 @@ describe("validate action orchestration", () => {
     expect(commands.setFailed).not.toHaveBeenCalled();
   });
 
-  it("fails when strict manual revision validation detects a change", async () => {
-    const { commands, performReplacements } = await loadValidateAction({
-      VALIDATE_PREVIOUS_REVISION_USER: "true",
-    });
+  it("does not inspect manual changes in normal validation mode", async () => {
+    const { commands, detectManualChangeForFlows } = await loadValidateAction({});
 
-    expect(performReplacements).toHaveBeenCalledWith(configuration, { flowService: {} }, "dry", {
-      skipFlowNames: [],
-    });
-    expect(commands.logError).toHaveBeenCalledWith(expect.stringContaining("Manual Flow"));
-    expect(commands.setFailed).toHaveBeenCalledWith("Validation failed.");
-  });
-
-  it("rejects strict and partial modes being enabled together", async () => {
-    const { commands, performReplacements } = await loadValidateAction({
-      ALLOW_PARTIAL_DEPLOY: "true",
-      VALIDATE_PREVIOUS_REVISION_USER: "true",
-    });
-
-    expect(commands.setFailed).toHaveBeenCalledWith(
-      "ALLOW_PARTIAL_DEPLOY and VALIDATE_PREVIOUS_REVISION_USER cannot both be true."
-    );
-    expect(performReplacements).not.toHaveBeenCalled();
+    expect(detectManualChangeForFlows).not.toHaveBeenCalled();
+    expect(commands.setFailed).not.toHaveBeenCalled();
   });
 });
