@@ -229,7 +229,7 @@ export const studioFlowSchema = z
           name: z.string(),
           type: z.string(),
           transitions: z.array(studioFlowTransitionSchema).default([]),
-          properties: z.record(z.unknown()),
+          properties: z.record(z.string(), z.unknown()),
         })
         .passthrough()
     ),

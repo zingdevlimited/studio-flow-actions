@@ -18,10 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: 20.8.0
+          node-version: 24.20.0
           cache: yarn
           cache-dependency-path: yarn.lock
 
@@ -43,7 +43,7 @@ jobs:
           mainTag="v${verTokens[0]}.${verTokens[1]}.${verTokens[2]}"
           minorTag="v${verTokens[0]}.${verTokens[1]}"
           majorTag="v${verTokens[0]}"
-          
+
           echo "MAIN_TAG=$mainTag" >> "$GITHUB_OUTPUT"
           echo "MINOR_TAG=$minorTag" >> "$GITHUB_OUTPUT"
           echo "MAJOR_TAG=$majorTag" >> "$GITHUB_OUTPUT"
@@ -61,7 +61,7 @@ jobs:
 
       - name: Output Build
         run: yarn package:all
-        
+
       - name: Commit and Push
         id: commit
         uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
