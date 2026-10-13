@@ -47,8 +47,7 @@ const loadDeployAction = async (inputs: Record<string, string>) => {
     detectManualChangeForFlows: jest.fn().mockReturnValue(detectionResults),
   }));
 
-  // eslint-disable-next-line global-require
-  require("./index");
+  jest.requireActual("./index");
   await new Promise((resolve) => setImmediate(resolve));
 
   return { commands, performReplacements };

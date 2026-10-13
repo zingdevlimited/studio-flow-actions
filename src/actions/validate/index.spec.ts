@@ -53,8 +53,7 @@ const loadValidateAction = async (inputs: Record<string, string>) => {
     detectManualChangeForFlows,
   }));
 
-  // eslint-disable-next-line global-require
-  require("./index");
+  jest.requireActual("./index");
   await new Promise((resolve) => setImmediate(resolve));
 
   return { commands, performReplacements, detectManualChangeForFlows };
