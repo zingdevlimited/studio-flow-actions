@@ -90,7 +90,7 @@ export const readFileLocalOrRemote = async (filePath: string) => {
 export const tryReadFileLocalOrRemote = async (filePath: string) => {
   try {
     return await readFileLocalOrRemote(filePath);
-  } catch (err) {
+  } catch {
     return null;
   }
 };
