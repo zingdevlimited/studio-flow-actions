@@ -8,7 +8,7 @@
     "node": ">=20.8.0"
   },
   "scripts": {
-    "lint": "eslint",
+    "lint": "eslint src",
     "run:sync": "node sync/index.js",
     "run:check": "node check/index.js",
     "run:validate": "node validate/index.js",
@@ -55,6 +55,9 @@
     "@babel/core": "^8.0.6",
     "@babel/plugin-syntax-flow": "^8.0.1",
     "@babel/plugin-transform-react-jsx": "^8.0.1",
+    "@eslint/compat": "^2.0.0",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^10.0.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.3",
     "@typescript-eslint/eslint-plugin": "^8.71.0",

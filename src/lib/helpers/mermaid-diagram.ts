@@ -263,7 +263,6 @@ export const convertMermaidDiagramToSvg = async (mermaidContent: string) => {
     commands.logInfo("Pulling Mermaid CLI image...");
     await execAsync("docker pull ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:11.4.2");
     mkdirSync("TEMP_DIAGRAMS", { recursive: true });
-    // eslint-disable-next-line quotes
     writeFileSync(
       "TEMP_DIAGRAMS/mmdconfig.json",
       JSON.stringify({
