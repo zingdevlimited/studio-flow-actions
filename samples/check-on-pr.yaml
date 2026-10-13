@@ -12,6 +12,6 @@ jobs:
   check_flows:
     runs-on: ubuntu-22.04
     steps:
-      - uses: zingdevlimited/studio-flow-actions/check@v1
+      - uses: zingdevlimited/studio-flow-actions/check@v2
         with:
           CONFIG_PATH: studioconfig.json
