@@ -25,7 +25,7 @@ jobs:
   validate:
     runs-on: ubuntu-22.04
     steps:
-      - uses: zingdevlimited/studio-flow-actions/validate@v1
+      - uses: zingdevlimited/studio-flow-actions/validate@v2
         with:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # Ensure the same inputs are used as the validate step
-      - uses: zingdevlimited/studio-flow-actions/deploy@v1
+      - uses: zingdevlimited/studio-flow-actions/deploy@v2
         with:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ env.TWILIO_API_KEY }}

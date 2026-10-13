@@ -15,7 +15,7 @@ You can get autocomplete in your IDE by setting the `$schema` variable in your f
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v1/config-schema.json",
+  "$schema": "https://raw.githubusercontent.com/zingdevlimited/studio-flow-actions/v2/config-schema.json",
   "flows": [],
   "replaceWidgetTypes": []
 }
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Sync Flows
-        uses: zingdevlimited/studio-flow-actions/sync@v1
+        uses: zingdevlimited/studio-flow-actions/sync@v2
         with:
           CONFIG_PATH: studioconfig.json
           ADD_MISSING_DEPLOY_PROPERTIES: true
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check Flows
-        uses: zingdevlimited/studio-flow-actions/check@v1
+        uses: zingdevlimited/studio-flow-actions/check@v2
         with:
           CONFIG_PATH: studioconfig.json
 ```
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Validate Flows
-        uses: zingdevlimited/studio-flow-actions/validate@v1
+        uses: zingdevlimited/studio-flow-actions/validate@v2
         with:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Deploy Flows
-        uses: zingdevlimited/studio-flow-actions/deploy@v1
+        uses: zingdevlimited/studio-flow-actions/deploy@v2
         with:
           CONFIG_PATH: studioconfig.json
           TWILIO_API_KEY: ${{ vars.TWILIO_API_KEY }}
@@ -134,11 +134,11 @@ jobs:
 
 Choose the mode that matches the desired behavior:
 
-| Mode      | Inputs                                                               | Behavior                                                                 |
-| --------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `normal`  | Validate: `MANUAL_CHANGE_MODE=normal`; deploy: `ALLOW_PARTIAL_DEPLOY=false` | Validate and deploy all flows.                                           |
-| `partial` | Validate: `MANUAL_CHANGE_MODE=partial`; deploy: `ALLOW_PARTIAL_DEPLOY=true` | Warn, skip manually changed flows, and continue.                         |
-| `strict`  | Validate: `MANUAL_CHANGE_MODE=strict`                                | Fail validation when a manually changed flow is detected.               |
+| Mode      | Inputs                                                                      | Behavior                                                  |
+| --------- | --------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `normal`  | Validate: `MANUAL_CHANGE_MODE=normal`; deploy: `ALLOW_PARTIAL_DEPLOY=false` | Validate and deploy all flows.                            |
+| `partial` | Validate: `MANUAL_CHANGE_MODE=partial`; deploy: `ALLOW_PARTIAL_DEPLOY=true` | Warn, skip manually changed flows, and continue.          |
+| `strict`  | Validate: `MANUAL_CHANGE_MODE=strict`                                       | Fail validation when a manually changed flow is detected. |
 
 The [Validate and Deploy sample workflow](samples/validate-and-deploy.yaml) provides a dropdown for choosing one of these modes and maps it to the required action inputs.
 
