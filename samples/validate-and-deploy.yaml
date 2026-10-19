@@ -23,7 +23,7 @@ env:
 
 jobs:
   validate:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: zingdevlimited/studio-flow-actions/validate@v2
         with:
@@ -35,7 +35,7 @@ jobs:
           ASSETS_BASE_URL: https://yourassets.com
   deploy:
     needs: validate
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       # Ensure the same inputs are used as the validate step
       - uses: zingdevlimited/studio-flow-actions/deploy@v2
