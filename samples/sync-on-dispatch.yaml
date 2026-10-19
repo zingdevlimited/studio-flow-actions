@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   sync_flows:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TWILIO_API_KEY: ${{ vars.DEVELOP_TWILIO_API_KEY }}
       TWILIO_API_SECRET: ${{ secrets.DEVELOP_TWILIO_API_SECRET }}

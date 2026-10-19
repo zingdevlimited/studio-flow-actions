@@ -44,7 +44,7 @@ permissions:
 
 jobs:
   sync:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Sync Flows
         uses: zingdevlimited/studio-flow-actions/sync@v2
@@ -68,7 +68,7 @@ Note that this is an **offline** check and therefore does not use Twilio Credent
 ```yaml
 jobs:
   check:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Check Flows
         uses: zingdevlimited/studio-flow-actions/check@v2
@@ -89,7 +89,7 @@ This action will:
 ```yaml
 jobs:
   validate:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Validate Flows
         uses: zingdevlimited/studio-flow-actions/validate@v2
@@ -117,7 +117,7 @@ Use **MANUAL_CHANGE_MODE** on the Validate action to control how it handles manu
 ```yaml
 jobs:
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Deploy Flows
         uses: zingdevlimited/studio-flow-actions/deploy@v2
