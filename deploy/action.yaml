@@ -1,5 +1,5 @@
 name: Deploy Studio Flow
-description: Deploy Studio Flows to a Twilio account ([Documentation](https://github.com/zingdevlimited/studio-flow-actions/blob/v1/README.md#deploy))
+description: Deploy Studio Flows to a Twilio account ([Documentation](https://github.com/zingdevlimited/studio-flow-actions/blob/v2/README.md#deploy))
 
 inputs:
   CONFIG_PATH:
@@ -15,11 +15,15 @@ inputs:
     required: false
     description: (Optional) Commit message in the Studio Flow revisions
     default: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  ALLOW_PARTIAL_DEPLOY:
+    required: false
+    description: Set to `true` to skip deploying flows that were manually changed while still deploying unaffected flows.
+    default: false
   TOKEN:
     required: false
     description: "A GitHub token with `contents:read` permission (used if required files are not already checked out)"
     default: ${{ github.token }}
 
 runs:
-  using: node20
+  using: node24
   main: index.js
