@@ -97,7 +97,9 @@ class MermaidBuilder {
     for (const transition of transitions) {
       if (!transition.next) continue;
       let label = transition.event;
-      let conditions = transition.conditions?.map((c) => `${c.type} ${c.value}`).join(", ");
+      let conditions = transition.conditions
+        ?.map((c) => (c.value === undefined ? c.type : `${c.type} ${c.value}`))
+        .join(", ");
       if (conditions) {
         label = `${label}: ${conditions}`;
       }
@@ -261,7 +263,6 @@ export const convertMermaidDiagramToSvg = async (mermaidContent: string) => {
     commands.logInfo("Pulling Mermaid CLI image...");
     await execAsync("docker pull ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:11.4.2");
     mkdirSync("TEMP_DIAGRAMS", { recursive: true });
-    // eslint-disable-next-line quotes
     writeFileSync(
       "TEMP_DIAGRAMS/mmdconfig.json",
       JSON.stringify({

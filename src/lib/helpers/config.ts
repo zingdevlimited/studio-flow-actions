@@ -36,9 +36,9 @@ export const configFileSchema = z.object({
       })
     )
     .default([]),
-  workflowMap: z.record(z.string()).optional(),
-  subflowMap: z.record(z.string()).optional(),
-  variableReplacements: z.record(z.string()).optional(),
+  workflowMap: z.record(z.string(), z.string()).optional(),
+  subflowMap: z.record(z.string(), z.string()).optional(),
+  variableReplacements: z.record(z.string(), z.string()).optional(),
   customPropertyReplacements: z
     .array(
       z.object({
@@ -90,7 +90,7 @@ export const readFileLocalOrRemote = async (filePath: string) => {
 export const tryReadFileLocalOrRemote = async (filePath: string) => {
   try {
     return await readFileLocalOrRemote(filePath);
-  } catch (err) {
+  } catch {
     return null;
   }
 };

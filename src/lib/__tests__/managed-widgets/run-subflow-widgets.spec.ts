@@ -71,6 +71,7 @@ const mockServices: TwilioServices = {
   channelMap: {},
   workflowMap: {},
   twilioClient: {} as any,
+  flowService: {} as any,
 };
 
 describe("getManagedWidgets (run-subflow)", () => {
