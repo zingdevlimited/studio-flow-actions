@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup Node 24
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: 24.20.0
           cache: yarn
@@ -72,7 +72,7 @@ jobs:
           push_options: "--force"
 
       - name: Update tags to point to commit
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             const commitHash = "${{ env.COMMIT_HASH }}"
