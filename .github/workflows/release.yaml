@@ -11,6 +11,10 @@ on:
           - minor
           - major
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
     runs-on: ubuntu-22.04
@@ -50,6 +54,7 @@ jobs:
 
           echo "OLD_VERSION=$oldVersion" >> "$GITHUB_OUTPUT"
           echo "NEW_VERSION=$newVersion" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_BRANCH=release/v$newVersion" >> "$GITHUB_OUTPUT"
 
       - name: Update README Version
         run: |
@@ -62,53 +67,27 @@ jobs:
       - name: Output Build
         run: yarn package:all
 
-      - name: Commit and Push
-        id: commit
+      - name: Commit and Push to Release Branch
         uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
         with:
-          branch: main
+          branch: ${{ steps.bump.outputs.RELEASE_BRANCH }}
+          create_branch: true
           file_pattern: "package.json README.md **/index.js"
           commit_message: "auto: Update version to ${{ steps.bump.outputs.NEW_VERSION }} [skip ci]"
           push_options: "--force"
 
-      - name: Update tags to point to commit
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const commitHash = "${{ env.COMMIT_HASH }}"
-            const tags = [
-              "${{ env.MAIN_TAG }}",
-              "${{ env.MINOR_TAG }}",
-              "${{ env.MAJOR_TAG }}"
-            ];
-            for (const tag of tags) {
-              let ref;
-              try {
-                ref = await github.rest.git.getRef({
-                  ...context.repo,
-                  ref: `tags/${tag}`
-                })
-              } catch (e) {
-                if (e.status === 404) {
-                  // continue
-                }
-              }
-              if (!ref) {
-                await github.rest.git.createRef({
-                  ...context.repo,
-                  ref: `refs/tags/${tag}`,
-                  sha: commitHash
-                });
-              } else {
-                await github.rest.git.updateRef({
-                  ...context.repo,
-                  ref: `tags/${tag}`,
-                  sha: commitHash
-                })
-              }
-            }
+      - name: Open Pull Request
         env:
-          MAIN_TAG: ${{ steps.bump.outputs.MAIN_TAG }}
-          MINOR_TAG: ${{ steps.bump.outputs.MINOR_TAG }}
-          MAJOR_TAG: ${{ steps.bump.outputs.MAJOR_TAG }}
-          COMMIT_HASH: ${{ steps.commit.outputs.commit_hash }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_BRANCH: ${{ steps.bump.outputs.RELEASE_BRANCH }}
+          NEW_VERSION: ${{ steps.bump.outputs.NEW_VERSION }}
+        run: |
+          if gh pr view "$RELEASE_BRANCH" --json number >/dev/null 2>&1; then
+            echo "Pull request for $RELEASE_BRANCH already exists"
+          else
+            gh pr create \
+              --base main \
+              --head "$RELEASE_BRANCH" \
+              --title "Release v$NEW_VERSION" \
+              --body "Automated version bump to $NEW_VERSION. Merging this PR creates the v$NEW_VERSION tags on the merge commit."
+          fi
