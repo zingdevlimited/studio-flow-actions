@@ -1,6 +1,6 @@
 # Studio Flow Actions
 
-> Version: 1.5.1
+> Version: 2.0.0
 
 This repository is a collection of GitHub Actions for automated operations related to Twilio Studio Flows.
 The prerequisites to these actions are:
